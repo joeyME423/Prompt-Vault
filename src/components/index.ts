@@ -13,3 +13,8 @@ export { PromptCard } from './prompts/PromptCard'
 // UI
 export { SearchBar } from './ui/SearchBar'
 export { FilterTabs } from './ui/FilterTabs'
+
+// Chat
+export { ChatInterface } from './chat/ChatInterface'
+export { ChatInput } from './chat/ChatInput'
+export { MessageBubble } from './chat/MessageBubble'

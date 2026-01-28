@@ -28,6 +28,9 @@ export function Navbar() {
             <Link href="/library" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
               Library
             </Link>
+            <Link href="/assistant" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
+              Assistant
+            </Link>
             <Link href="#features" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
               Features
             </Link>
@@ -69,6 +72,9 @@ export function Navbar() {
           <div className="px-4 py-4 space-y-3">
             <Link href="/library" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
               Library
+            </Link>
+            <Link href="/assistant" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
+              Assistant
             </Link>
             <Link href="#features" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
               Features
