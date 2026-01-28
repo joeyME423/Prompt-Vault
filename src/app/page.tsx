@@ -1,5 +1,6 @@
 import { Hero } from '@/components/layout/Hero'
 import { Features } from '@/components/layout/Features'
+import { NewPrompts } from '@/components/layout/NewPrompts'
 import { Pricing } from '@/components/layout/Pricing'
 import { Footer } from '@/components/layout/Footer'
 
@@ -8,6 +9,7 @@ export default function Home() {
     <div className="min-h-screen">
       <Hero />
       <Features />
+      <NewPrompts />
       <Pricing />
       <Footer />
     </div>

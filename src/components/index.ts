@@ -5,6 +5,7 @@ export { Hero } from './layout/Hero'
 export { Features } from './layout/Features'
 export { Pricing } from './layout/Pricing'
 export { Footer } from './layout/Footer'
+export { NewPrompts } from './layout/NewPrompts'
 
 // Prompts
 export { PromptCard } from './prompts/PromptCard'
