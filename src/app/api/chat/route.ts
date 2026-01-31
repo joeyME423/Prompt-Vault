@@ -1,6 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk'
+import Groq from 'groq-sdk'
 
-const client = new Anthropic()
+const client = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+})
 
 const SYSTEM_PROMPT = `You are an expert AI prompt engineering assistant. Your role is to help users write better prompts for AI systems like Claude, GPT, and other large language models.
 
@@ -35,11 +37,14 @@ export async function POST(request: Request) {
       content: msg.content,
     }))
 
-    const stream = await client.messages.stream({
-      model: 'claude-sonnet-4-20250514',
+    const stream = await client.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
       max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: formattedMessages,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...formattedMessages,
+      ],
+      stream: true,
     })
 
     const encoder = new TextEncoder()
@@ -47,10 +52,10 @@ export async function POST(request: Request) {
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const event of stream) {
-            if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-              const chunk = event.delta.text
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`))
+          for await (const chunk of stream) {
+            const text = chunk.choices[0]?.delta?.content
+            if (text) {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`))
             }
           }
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))
