@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Brain, Sparkles, ArrowLeft, Plus, BookOpen, Lightbulb, ChevronRight } from 'lucide-react'
+import { Brain, Sparkles, ArrowLeft, Plus, BookOpen, Lightbulb, ChevronRight, AlertCircle } from 'lucide-react'
 import { PM_TOOLS, getToolBySlug, PMTool } from '@/data/tools'
 import { createClient } from '@/lib/supabase/client'
 import { Prompt } from '@/types/database'
@@ -62,6 +62,7 @@ export default function ToolPage({ params }: ToolPageProps) {
   const tool = getToolBySlug(params.slug)
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(false)
   const [categoryStats, setCategoryStats] = useState<Record<string, number>>({})
 
   useEffect(() => {
@@ -76,10 +77,12 @@ export default function ToolPage({ params }: ToolPageProps) {
         .eq('is_public', true)
         .order('created_at', { ascending: false })
 
-      if (!error && data) {
+      if (error) {
+        console.error('Error fetching prompts:', error)
+        setFetchError(true)
+      } else if (data) {
         const promptsData = data as Prompt[]
         setPrompts(promptsData)
-        // Calculate category stats
         const stats: Record<string, number> = {}
         promptsData.forEach((prompt) => {
           stats[prompt.category] = (stats[prompt.category] || 0) + 1
@@ -97,7 +100,7 @@ export default function ToolPage({ params }: ToolPageProps) {
   }
 
   return (
-    <main className="min-h-screen pt-20 pb-16 px-4 bg-slate-50 dark:bg-dark-bg">
+    <main className="min-h-screen pt-24 pb-16 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-6">
@@ -260,6 +263,16 @@ export default function ToolPage({ params }: ToolPageProps) {
                   </div>
                 </div>
               ))}
+            </div>
+          ) : fetchError ? (
+            <div className="bg-white dark:bg-dark-card rounded-2xl border border-slate-200 dark:border-dark-border p-12 text-center">
+              <AlertCircle className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                Unable to load prompts
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400">
+                Something went wrong. Please try refreshing the page.
+              </p>
             </div>
           ) : prompts.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">

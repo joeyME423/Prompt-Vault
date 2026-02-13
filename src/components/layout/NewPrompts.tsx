@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { PromptCard } from '@/components/prompts/PromptCard'
 import type { Prompt } from '@/types'
@@ -10,19 +10,22 @@ import type { Prompt } from '@/types'
 export function NewPrompts() {
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     async function fetchNewPrompts() {
       const supabase = createClient()
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('prompts')
         .select('*')
         .eq('is_public', true)
+        .is('team_id', null)
         .order('created_at', { ascending: false })
         .limit(3)
 
-      if (error) {
-        console.error('Error fetching prompts:', error)
+      if (fetchError) {
+        console.error('Error fetching prompts:', fetchError)
+        setError(true)
       } else {
         setPrompts(data || [])
       }
@@ -47,6 +50,19 @@ export function NewPrompts() {
     )
   }
 
+  if (error) {
+    return (
+      <section className="py-20 bg-slate-50 dark:bg-dark-card">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <AlertCircle className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+          <p className="text-slate-500 dark:text-slate-400">
+            Unable to load prompts right now. Please try again later.
+          </p>
+        </div>
+      </section>
+    )
+  }
+
   if (prompts.length === 0) {
     return null
   }
@@ -58,17 +74,17 @@ export function NewPrompts() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-12">
           <div>
             <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-              Newest Prompts
+              Community Prompts
             </h2>
             <p className="text-slate-600 dark:text-slate-400">
-              Check out the latest additions to our prompt library
+              The latest prompts contributed by the PM community
             </p>
           </div>
           <Link
-            href="/library"
+            href="/community"
             className="inline-flex items-center gap-2 text-primary-500 hover:text-primary-600 font-medium transition-colors"
           >
-            View all prompts
+            View all community prompts
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

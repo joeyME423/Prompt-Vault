@@ -9,12 +9,8 @@ export { NewPrompts } from './layout/NewPrompts'
 
 // Prompts
 export { PromptCard } from './prompts/PromptCard'
+export { StarRating } from './prompts/StarRating'
 
 // UI
 export { SearchBar } from './ui/SearchBar'
 export { FilterTabs } from './ui/FilterTabs'
-
-// Chat
-export { ChatInterface } from './chat/ChatInterface'
-export { ChatInput } from './chat/ChatInput'
-export { MessageBubble } from './chat/MessageBubble'

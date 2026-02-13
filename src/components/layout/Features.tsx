@@ -63,7 +63,7 @@ export function Features() {
             Everything You Need to <span className="gradient-text">Work Smarter</span>
           </h2>
           <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-            PromptFlow gives you the tools to find, save, and use AI prompts that make project management easier.
+            PromptVault gives you the tools to find, save, and use AI prompts that make project management easier.
           </p>
         </div>
 

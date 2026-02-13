@@ -15,7 +15,7 @@ export function Footer() {
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-slate-900 dark:text-white">
-                Prompt<span className="text-primary-500">Flow</span>
+                Prompt<span className="text-primary-500">Vault</span>
               </span>
             </Link>
             <p className="text-slate-600 dark:text-slate-400 text-sm">
@@ -33,12 +33,12 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#features" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
+                <Link href="/#features" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="#pricing" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
+                <Link href="/#pricing" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
                   Pricing
                 </Link>
               </li>
@@ -50,35 +50,30 @@ export function Footer() {
             <h4 className="font-semibold text-slate-900 dark:text-white mb-4">Resources</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/blog" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
-                  Blog
+                <Link href="/contribute" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
+                  Contribute
                 </Link>
               </li>
               <li>
-                <Link href="/guides" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
-                  Guides
-                </Link>
-              </li>
-              <li>
-                <Link href="/support" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
-                  Support
+                <Link href="/tools" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
+                  PM Tools
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Connect */}
           <div>
-            <h4 className="font-semibold text-slate-900 dark:text-white mb-4">Legal</h4>
+            <h4 className="font-semibold text-slate-900 dark:text-white mb-4">Get Started</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/privacy" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
-                  Privacy Policy
+                <Link href="/auth/signup" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
+                  Sign Up
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
-                  Terms of Service
+                <Link href="/auth/login" className="text-slate-600 dark:text-slate-400 hover:text-primary-500 text-sm">
+                  Log In
                 </Link>
               </li>
             </ul>
@@ -87,7 +82,7 @@ export function Footer() {
 
         <div className="border-t border-slate-200 dark:border-dark-border mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-slate-500 dark:text-slate-400 text-sm">
-            &copy; {new Date().getFullYear()} PromptFlow. All rights reserved.
+            &copy; {new Date().getFullYear()} PromptVault. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             <a href="#" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">

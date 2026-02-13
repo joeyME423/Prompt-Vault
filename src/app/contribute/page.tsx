@@ -3,12 +3,13 @@
 import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Send, Sparkles, Check, Plus, Library } from 'lucide-react'
+import { Send, Sparkles, Check, Plus, Library, Users, Globe } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
 import { getToolBySlug } from '@/data/tools'
 
 type PromptInsert = Database['public']['Tables']['prompts']['Insert']
+type CommunityInsert = Database['public']['Tables']['community_submissions']['Insert']
 
 const CATEGORIES = [
   'Planning',
@@ -47,6 +48,7 @@ interface FormData {
   category: string
   tags: string
   pmTools: string[]
+  email: string
 }
 
 interface FormErrors {
@@ -54,6 +56,7 @@ interface FormErrors {
   description?: string
   content?: string
   category?: string
+  email?: string
 }
 
 function ContributeForm() {
@@ -68,12 +71,42 @@ function ContributeForm() {
     category: '',
     tags: '',
     pmTools: preselectedTool ? [preselectedTool.name] : [],
+    email: '',
   })
   const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const [authChecked, setAuthChecked] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [teamId, setTeamId] = useState<string | null>(null)
 
-  // Update pmTools when preselectedTool changes (for client-side navigation)
+  // Check auth state and get team
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (session) {
+        setUserId(session.user.id)
+        // Get user's team
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: membership } = await (supabase.from('team_members') as any)
+          .select('team_id')
+          .eq('user_id', session.user.id)
+          .limit(1)
+          .maybeSingle()
+
+        if (membership) {
+          setTeamId(membership.team_id)
+        }
+      }
+      setAuthChecked(true)
+    }
+    checkAuth()
+  }, [])
+
+  // Update pmTools when preselectedTool changes
   useEffect(() => {
     if (preselectedTool) {
       setFormData((prev) => {
@@ -85,21 +118,16 @@ function ContributeForm() {
     }
   }, [preselectedTool])
 
+  const isLoggedIn = !!userId
+
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
 
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required'
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required'
-    }
-    if (!formData.content.trim()) {
-      newErrors.content = 'Prompt content is required'
-    }
-    if (!formData.category) {
-      newErrors.category = 'Please select a category'
-    }
+    if (!formData.title.trim()) newErrors.title = 'Title is required'
+    if (!formData.description.trim()) newErrors.description = 'Description is required'
+    if (!formData.content.trim()) newErrors.content = 'Prompt content is required'
+    if (!formData.category) newErrors.category = 'Please select a category'
+    if (!isLoggedIn && !formData.email.trim()) newErrors.email = 'Email is required'
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -107,42 +135,55 @@ function ContributeForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (!validateForm()) return
 
     setIsSubmitting(true)
+    setSubmitError('')
 
     try {
       const supabase = createClient()
 
-      // Parse tags and combine with PM tools
       const tagList = formData.tags
         .split(',')
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0)
-
-      // Add PM tools as tags with "tool:" prefix
       const toolTags = formData.pmTools.map((tool) => `tool:${tool}`)
       const allTags = [...tagList, ...toolTags]
 
-      const promptData: PromptInsert = {
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        content: formData.content.trim(),
-        category: formData.category,
-        tags: allTags,
-        is_public: true,
+      if (isLoggedIn && teamId) {
+        // Team prompt — private to the user's team
+        const promptData: PromptInsert = {
+          title: formData.title.trim(),
+          description: formData.description.trim(),
+          content: formData.content.trim(),
+          category: formData.category,
+          tags: allTags,
+          author_id: userId,
+          team_id: teamId,
+          is_public: false,
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase.from('prompts') as any).insert(promptData)
+        if (error) throw error
+      } else {
+        // Community submission — goes through review
+        const submissionData: CommunityInsert = {
+          title: formData.title.trim(),
+          description: formData.description.trim(),
+          content: formData.content.trim(),
+          category: formData.category,
+          tags: allTags,
+          submitter_email: formData.email.trim(),
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase.from('community_submissions') as any).insert(submissionData)
+        if (error) throw error
       }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase.from('prompts') as any).insert(promptData)
-
-      if (error) throw error
 
       setIsSuccess(true)
     } catch (error) {
       console.error('Error submitting prompt:', error)
-      alert('Failed to submit prompt. Please try again.')
+      setSubmitError('Failed to submit prompt. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -165,10 +206,13 @@ function ContributeForm() {
       category: '',
       tags: '',
       pmTools: [],
+      email: '',
     })
     setErrors({})
     setIsSuccess(false)
   }
+
+  if (!authChecked) return null
 
   if (isSuccess) {
     return (
@@ -178,10 +222,12 @@ function ContributeForm() {
             <Check className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-            Prompt Submitted!
+            {isLoggedIn ? 'Prompt Added to Your Team!' : 'Submission Received!'}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mb-8">
-            Thank you for contributing to the PromptFlow community.
+            {isLoggedIn
+              ? 'Your prompt has been added to your team library.'
+              : 'Thanks for contributing! Your prompt will be reviewed and, if approved, added to the Community Prompts section.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
@@ -192,11 +238,11 @@ function ContributeForm() {
               Add Another
             </button>
             <Link
-              href="/library"
+              href={isLoggedIn ? '/library' : '/community'}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 dark:bg-dark-surface hover:bg-slate-200 dark:hover:bg-dark-hover text-slate-900 dark:text-white rounded-xl transition-colors"
             >
               <Library className="w-5 h-5" />
-              View in Library
+              {isLoggedIn ? 'View Team Library' : 'Browse Community'}
             </Link>
           </div>
         </div>
@@ -207,7 +253,7 @@ function ContributeForm() {
   return (
     <div className="max-w-2xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-6">
         <div
           className={`w-12 h-12 rounded-xl flex items-center justify-center ${
             preselectedTool ? '' : 'bg-gradient-to-br from-primary-400 to-accent-purple'
@@ -233,8 +279,49 @@ function ContributeForm() {
         </div>
       </div>
 
+      {/* Submission type banner */}
+      {isLoggedIn ? (
+        <div className="mb-6 p-4 rounded-xl bg-primary-500/10 border border-primary-500/20 flex items-center gap-3">
+          <Users className="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0" />
+          <p className="text-sm text-primary-700 dark:text-primary-300">
+            This prompt will be added to <strong>your team&apos;s private library</strong>.
+          </p>
+        </div>
+      ) : (
+        <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3">
+          <Globe className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <div className="text-sm text-amber-700 dark:text-amber-300">
+            <strong>Community submission</strong> — your prompt will be reviewed before appearing in the Community Prompts section.{' '}
+            <Link href="/auth/signup" className="underline font-medium">Sign up</Link> to add prompts directly to your team.
+          </div>
+        </div>
+      )}
+
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Email (anonymous only) */}
+        {!isLoggedIn && (
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-slate-900 dark:text-white mb-2"
+            >
+              Your Email <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="you@example.com"
+              className={`w-full px-4 py-3 bg-white dark:bg-dark-card border rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 ${
+                errors.email ? 'border-red-500' : 'border-slate-200 dark:border-dark-border'
+              }`}
+            />
+            {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+          </div>
+        )}
+
         {/* Title */}
         <div>
           <label
@@ -385,6 +472,13 @@ function ContributeForm() {
           </div>
         </div>
 
+        {/* Submit Error */}
+        {submitError && (
+          <div className="p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+            <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>
+          </div>
+        )}
+
         {/* Submit */}
         <div className="pt-4">
           <button
@@ -400,7 +494,7 @@ function ContributeForm() {
             ) : (
               <>
                 <Send className="w-5 h-5" />
-                Submit Prompt
+                {isLoggedIn ? 'Add to Team Library' : 'Submit for Review'}
               </>
             )}
           </button>
@@ -433,7 +527,7 @@ function FormLoading() {
 
 export default function ContributePage() {
   return (
-    <main className="min-h-screen pt-20 pb-8 px-4 bg-slate-50 dark:bg-dark-bg">
+    <main className="min-h-screen pt-24 pb-8 px-4">
       <Suspense fallback={<FormLoading />}>
         <ContributeForm />
       </Suspense>

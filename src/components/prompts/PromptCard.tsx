@@ -1,15 +1,20 @@
 'use client'
 
-import { Copy, Bookmark, BookmarkCheck } from 'lucide-react'
-import { useState } from 'react'
+import { Copy, Bookmark, BookmarkCheck, Lock } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
+import { StarRating } from './StarRating'
 import type { Prompt } from '@/types'
 
 interface PromptCardProps {
   prompt: Prompt
-  isSaved?: boolean
-  onSave?: (promptId: string) => void
+  showRating?: boolean
+  userId?: string | null
   onCopy?: (content: string) => void
 }
+
+const FREE_SAVE_LIMIT = 10
 
 const categoryColors: Record<string, string> = {
   planning: 'bg-accent-blue/10 text-accent-blue',
@@ -20,9 +25,92 @@ const categoryColors: Record<string, string> = {
   default: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300',
 }
 
-export function PromptCard({ prompt, isSaved = false, onSave, onCopy }: PromptCardProps) {
+export function PromptCard({ prompt, showRating = false, userId: externalUserId, onCopy }: PromptCardProps) {
   const [copied, setCopied] = useState(false)
-  const [saved, setSaved] = useState(isSaved)
+  const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [userId, setUserId] = useState<string | null>(externalUserId ?? null)
+  const [saveCount, setSaveCount] = useState(0)
+  const [showLimitMessage, setShowLimitMessage] = useState(false)
+  const [ratingData, setRatingData] = useState({ average: 0, total: 0, userRating: null as number | null })
+
+  useEffect(() => {
+    const checkSaveState = async () => {
+      const supabase = createClient()
+
+      // Use external userId if provided, otherwise check session
+      let currentUserId = externalUserId
+      if (!currentUserId) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) currentUserId = session.user.id
+      }
+      if (!currentUserId) return
+
+      setUserId(currentUserId)
+
+      // Check if this prompt is already saved
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: savedData } = await (supabase.from('saved_prompts') as any)
+        .select('id')
+        .eq('user_id', currentUserId)
+        .eq('prompt_id', prompt.id)
+        .maybeSingle()
+
+      if (savedData) setSaved(true)
+
+      // Get total save count for this user
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { count } = await (supabase.from('saved_prompts') as any)
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', currentUserId)
+
+      setSaveCount(count || 0)
+
+      // Fetch rating data if showing ratings
+      if (showRating) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: ratings } = await (supabase.from('prompt_ratings') as any)
+          .select('rating')
+          .eq('prompt_id', prompt.id)
+
+        if (ratings && ratings.length > 0) {
+          const avg = ratings.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / ratings.length
+          setRatingData(prev => ({ ...prev, average: avg, total: ratings.length }))
+        }
+
+        // Get user's rating
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: userRatingData } = await (supabase.from('prompt_ratings') as any)
+          .select('rating')
+          .eq('prompt_id', prompt.id)
+          .eq('user_id', currentUserId)
+          .maybeSingle()
+
+        if (userRatingData) {
+          setRatingData(prev => ({ ...prev, userRating: userRatingData.rating }))
+        }
+      }
+    }
+    checkSaveState()
+  }, [prompt.id, externalUserId, showRating])
+
+  // Also fetch ratings for anonymous users
+  useEffect(() => {
+    if (!showRating || userId) return
+    const fetchPublicRatings = async () => {
+      const supabase = createClient()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: ratings } = await (supabase.from('prompt_ratings') as any)
+        .select('rating')
+        .eq('prompt_id', prompt.id)
+
+      if (ratings && ratings.length > 0) {
+        const avg = ratings.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / ratings.length
+        setRatingData({ average: avg, total: ratings.length, userRating: null })
+      }
+    }
+    fetchPublicRatings()
+  }, [prompt.id, showRating, userId])
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(prompt.content)
@@ -31,9 +119,40 @@ export function PromptCard({ prompt, isSaved = false, onSave, onCopy }: PromptCa
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleSave = () => {
-    setSaved(!saved)
-    onSave?.(prompt.id)
+  const handleSave = async () => {
+    if (!userId) return
+    if (saving) return
+
+    if (!saved && saveCount >= FREE_SAVE_LIMIT) {
+      setShowLimitMessage(true)
+      setTimeout(() => setShowLimitMessage(false), 4000)
+      return
+    }
+
+    setSaving(true)
+    const supabase = createClient()
+
+    try {
+      if (saved) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase.from('saved_prompts') as any)
+          .delete()
+          .eq('user_id', userId)
+          .eq('prompt_id', prompt.id)
+        setSaved(false)
+        setSaveCount((c) => c - 1)
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase.from('saved_prompts') as any)
+          .insert({ user_id: userId, prompt_id: prompt.id })
+        setSaved(true)
+        setSaveCount((c) => c + 1)
+      }
+    } catch (error) {
+      console.error('Error saving prompt:', error)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const colorClass = categoryColors[prompt.category.toLowerCase()] || categoryColors.default
@@ -45,18 +164,40 @@ export function PromptCard({ prompt, isSaved = false, onSave, onCopy }: PromptCa
         <span className={`px-3 py-1 rounded-full text-xs font-medium ${colorClass}`}>
           {prompt.category}
         </span>
-        <button
-          onClick={handleSave}
-          className="text-slate-400 hover:text-primary-500 transition-colors"
-          aria-label={saved ? 'Remove from saved' : 'Save prompt'}
-        >
-          {saved ? (
-            <BookmarkCheck className="w-5 h-5 text-primary-500" />
-          ) : (
+        {userId ? (
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="text-slate-400 hover:text-primary-500 transition-colors disabled:opacity-50"
+            aria-label={saved ? 'Remove from saved' : 'Save prompt'}
+          >
+            {saved ? (
+              <BookmarkCheck className="w-5 h-5 text-primary-500" />
+            ) : (
+              <Bookmark className="w-5 h-5" />
+            )}
+          </button>
+        ) : (
+          <Link
+            href="/auth/login"
+            className="text-slate-400 hover:text-primary-500 transition-colors"
+            title="Log in to save prompts"
+          >
             <Bookmark className="w-5 h-5" />
-          )}
-        </button>
+          </Link>
+        )}
       </div>
+
+      {/* Save limit message */}
+      {showLimitMessage && (
+        <div className="mb-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center gap-2">
+          <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <p className="text-xs text-amber-700 dark:text-amber-300">
+            You&apos;ve reached the free limit of {FREE_SAVE_LIMIT} saved prompts.{' '}
+            <Link href="/#pricing" className="underline font-medium">Upgrade</Link> to save more.
+          </p>
+        </div>
+      )}
 
       {/* Content */}
       <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
@@ -65,6 +206,19 @@ export function PromptCard({ prompt, isSaved = false, onSave, onCopy }: PromptCa
       <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 flex-grow">
         {prompt.description}
       </p>
+
+      {/* Rating */}
+      {showRating && (
+        <div className="mb-4">
+          <StarRating
+            promptId={prompt.id}
+            userId={userId}
+            averageRating={ratingData.average}
+            totalRatings={ratingData.total}
+            userRating={ratingData.userRating}
+          />
+        </div>
+      )}
 
       {/* Tags */}
       {prompt.tags && prompt.tags.length > 0 && (

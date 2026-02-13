@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Zap, Users, BookOpen } from 'lucide-react'
+import { ArrowRight, Zap, Users, BookOpen, Plus } from 'lucide-react'
 
 export function Hero() {
   return (
@@ -15,6 +15,16 @@ export function Hero() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
+          {/* Contribute CTA Banner */}
+          <Link
+            href="/contribute"
+            className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-primary-500 to-accent-purple text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all mb-8 animate-fade-in group"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Contribute a Prompt</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/10 dark:bg-primary-500/20 border border-primary-500/20 mb-8 animate-fade-in">
             <Zap className="w-4 h-4 text-primary-500" />

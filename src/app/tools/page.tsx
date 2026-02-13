@@ -3,7 +3,7 @@ import { Sparkles, ArrowRight, Brain, Zap } from 'lucide-react'
 import { PM_TOOLS } from '@/data/tools'
 
 export const metadata = {
-  title: 'PM Tools | PromptFlow',
+  title: 'PM Tools | PromptVault',
   description: 'Explore AI-powered prompts for your favorite project management tools',
 }
 
@@ -20,7 +20,7 @@ function ToolIcon({ color }: { color: string }) {
 
 export default function ToolsPage() {
   return (
-    <main className="min-h-screen pt-20 pb-16 px-4 bg-slate-50 dark:bg-dark-bg">
+    <main className="min-h-screen pt-24 pb-16 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

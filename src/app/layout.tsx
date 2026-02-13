@@ -7,7 +7,7 @@ import { Navbar } from '@/components/layout/Navbar'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'PromptFlow - AI Prompt Library for Project Managers',
+  title: 'PromptVault - AI Prompt Library for Project Managers',
   description: 'Discover and save powerful AI prompts designed specifically for project managers. Boost your productivity with our curated prompt library.',
 }
 

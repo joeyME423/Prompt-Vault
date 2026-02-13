@@ -34,7 +34,7 @@ export function Navbar() {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold text-slate-900 dark:text-white">
-              Prompt<span className="text-primary-500">Flow</span>
+              Prompt<span className="text-primary-500">Vault</span>
             </span>
           </Link>
 
@@ -42,6 +42,9 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-8">
             <Link href="/library" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
               Library
+            </Link>
+            <Link href="/community" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
+              Community
             </Link>
 
             {/* PM Tools Dropdown */}
@@ -105,13 +108,10 @@ export function Navbar() {
               )}
             </div>
 
-            <Link href="/assistant" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
-              Assistant
-            </Link>
-            <Link href="#features" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
+            <Link href="/#features" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
               Features
             </Link>
-            <Link href="#pricing" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
+            <Link href="/#pricing" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
               Pricing
             </Link>
           </div>
@@ -157,6 +157,9 @@ export function Navbar() {
             <Link href="/library" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
               Library
             </Link>
+            <Link href="/community" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
+              Community
+            </Link>
 
             {/* Mobile PM Tools */}
             <div>
@@ -190,13 +193,10 @@ export function Navbar() {
               )}
             </div>
 
-            <Link href="/assistant" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
-              Assistant
-            </Link>
-            <Link href="#features" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
+            <Link href="/#features" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
               Features
             </Link>
-            <Link href="#pricing" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
+            <Link href="/#pricing" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
               Pricing
             </Link>
             <Link
