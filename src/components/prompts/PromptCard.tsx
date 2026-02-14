@@ -1,11 +1,12 @@
 'use client'
 
-import { Copy, Bookmark, BookmarkCheck, Lock } from 'lucide-react'
+import { Copy, Bookmark, BookmarkCheck, Lock, TrendingUp } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { StarRating } from './StarRating'
 import { FolderDropdown } from './FolderDropdown'
+import { PromptFeedback } from '@/components/ui/PromptFeedback'
 import { posthog } from '@/lib/posthog'
 import type { Prompt, PromptFolder } from '@/types'
 
@@ -13,7 +14,7 @@ interface PromptCardProps {
   prompt: Prompt
   showRating?: boolean
   userId?: string | null
-  onCopy?: (content: string) => void
+  onCopy?: (content: string, category: string) => void
   folders?: PromptFolder[]
   currentFolderId?: string | null
   onMoveToFolder?: (savedPromptId: string, folderId: string | null) => Promise<boolean>
@@ -40,6 +41,8 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
   const [saveCount, setSaveCount] = useState(0)
   const [showLimitMessage, setShowLimitMessage] = useState(false)
   const [ratingData, setRatingData] = useState({ average: 0, total: 0, userRating: null as number | null })
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [successRate, setSuccessRate] = useState<{ rate: number; total: number } | null>(null)
 
   useEffect(() => {
     const checkSaveState = async () => {
@@ -72,6 +75,17 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
         .eq('user_id', currentUserId)
 
       setSaveCount(count || 0)
+
+      // Fetch feedback/success rate data
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: feedbackData } = await (supabase.from('prompt_feedback') as any)
+        .select('helpful')
+        .eq('prompt_id', prompt.id)
+
+      if (feedbackData && feedbackData.length > 0) {
+        const helpful = feedbackData.filter((f: { helpful: boolean }) => f.helpful).length
+        setSuccessRate({ rate: Math.round((helpful / feedbackData.length) * 100), total: feedbackData.length })
+      }
 
       // Fetch rating data if showing ratings
       if (showRating) {
@@ -122,9 +136,12 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
   const handleCopy = async () => {
     await navigator.clipboard.writeText(prompt.content)
     setCopied(true)
-    onCopy?.(prompt.content)
+    onCopy?.(prompt.content, prompt.category)
     posthog.capture('prompt_copied', { prompt_id: prompt.id, category: prompt.category, title: prompt.title })
-    setTimeout(() => setCopied(false), 2000)
+    setTimeout(() => {
+      setCopied(false)
+      if (userId) setShowFeedback(true)
+    }, 1500)
   }
 
   const handleSave = async () => {
@@ -256,21 +273,40 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-dark-border">
-        <span className="text-xs text-slate-500 dark:text-slate-400">
-          Used {prompt.use_count.toLocaleString()} times
-        </span>
-        <button
-          onClick={handleCopy}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            copied
-              ? 'bg-primary-500 text-white'
-              : 'bg-slate-100 dark:bg-dark-hover text-slate-700 dark:text-slate-300 hover:bg-primary-500 hover:text-white'
-          }`}
-        >
-          <Copy className="w-4 h-4" />
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
+      <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-dark-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              Used {prompt.use_count.toLocaleString()} times
+            </span>
+            {successRate && successRate.total > 0 && (
+              <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                <TrendingUp className="w-3 h-3" />
+                {successRate.rate}% helpful
+              </span>
+            )}
+          </div>
+          <button
+            onClick={handleCopy}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              copied
+                ? 'bg-primary-500 text-white'
+                : 'bg-slate-100 dark:bg-dark-hover text-slate-700 dark:text-slate-300 hover:bg-primary-500 hover:text-white'
+            }`}
+          >
+            <Copy className="w-4 h-4" />
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+        {showFeedback && !copied && (
+          <div className="flex justify-end">
+            <PromptFeedback
+              promptId={prompt.id}
+              userId={userId}
+              onFeedback={() => setTimeout(() => setShowFeedback(false), 2000)}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

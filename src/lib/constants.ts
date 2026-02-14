@@ -28,6 +28,19 @@ export const ROLE_CATEGORY_MAP: Record<string, string[]> = {
   'Other': [],
 }
 
+// Estimated minutes saved per prompt copy, by category
+export const CATEGORY_TIME_SAVED: Record<string, number> = {
+  planning: 15,
+  execution: 12,
+  'risk management': 15,
+  communication: 10,
+  reporting: 20,
+  agile: 10,
+  meetings: 10,
+  stakeholder: 12,
+  risk: 15,
+}
+
 export const categoryColors: Record<string, string> = {
   planning: 'bg-accent-blue/10 text-accent-blue',
   execution: 'bg-primary-500/10 text-primary-500',

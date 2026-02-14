@@ -93,6 +93,16 @@ create table public.prompt_ratings (
   unique(prompt_id, user_id)
 );
 
+-- Prompt feedback table (success rate tracking)
+create table public.prompt_feedback (
+  id uuid default uuid_generate_v4() primary key,
+  prompt_id uuid references public.prompts(id) on delete cascade not null,
+  user_id uuid references public.profiles(id) on delete cascade,
+  helpful boolean not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique(prompt_id, user_id)
+);
+
 -- Enable Row Level Security
 alter table public.profiles enable row level security;
 alter table public.teams enable row level security;
@@ -102,6 +112,7 @@ alter table public.saved_prompts enable row level security;
 alter table public.community_submissions enable row level security;
 alter table public.prompt_ratings enable row level security;
 alter table public.prompt_folders enable row level security;
+alter table public.prompt_feedback enable row level security;
 
 -- Profiles policies
 create policy "Public profiles are viewable by everyone"
@@ -204,6 +215,19 @@ create policy "Users can update own rating"
   on public.prompt_ratings for update
   using (auth.uid() = user_id);
 
+-- Prompt feedback policies
+create policy "Anyone can view feedback"
+  on public.prompt_feedback for select
+  using (true);
+
+create policy "Authenticated users can give feedback"
+  on public.prompt_feedback for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update own feedback"
+  on public.prompt_feedback for update
+  using (auth.uid() = user_id);
+
 -- Prompt folders policies
 create policy "Users can view own folders"
   on public.prompt_folders for select
@@ -278,3 +302,4 @@ create index prompt_ratings_prompt_id_idx on public.prompt_ratings(prompt_id);
 create index prompt_ratings_user_id_idx on public.prompt_ratings(user_id);
 create index prompt_folders_user_id_idx on public.prompt_folders(user_id);
 create index saved_prompts_folder_id_idx on public.saved_prompts(folder_id);
+create index prompt_feedback_prompt_id_idx on public.prompt_feedback(prompt_id);

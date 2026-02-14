@@ -16,8 +16,9 @@ import { AlertCircle, Users, Plus, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useUserProfile } from '@/hooks/useUserProfile'
-import { ROLE_CATEGORY_MAP } from '@/lib/constants'
+import { ROLE_CATEGORY_MAP, CATEGORY_TIME_SAVED } from '@/lib/constants'
 import { posthog } from '@/lib/posthog'
+import { TimeSavedBanner } from '@/components/ui/TimeSavedBanner'
 import type { Prompt } from '@/types'
 
 const categories = ['Planning', 'Communication', 'Reporting', 'Risk', 'Stakeholder', 'Agile', 'Meetings']
@@ -42,6 +43,7 @@ export default function LibraryPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [activeFolder, setActiveFolder] = useState<string | null>(null) // null = All, 'unsorted' = no folder
   const [savedMappings, setSavedMappings] = useState<SavedPromptMapping[]>([])
+  const [copyCounts, setCopyCounts] = useLocalStorage<Record<string, number>>('pv-copy-counts', {})
 
   const { folders, createFolder, deleteFolder, moveToFolder } = useFolders(userId)
   const { profile } = useUserProfile()
@@ -124,6 +126,15 @@ export default function LibraryPage() {
       setSortDirection('asc')
     }
   }
+
+  const handleCopy = useCallback((_content: string, category: string) => {
+    setCopyCounts(prev => ({
+      ...prev,
+      [category.toLowerCase()]: (prev[category.toLowerCase()] || 0) + 1,
+    }))
+    const minutesSaved = CATEGORY_TIME_SAVED[category.toLowerCase()] || 10
+    posthog.capture('time_saved', { category, minutes: minutesSaved })
+  }, [setCopyCounts])
 
   const handleMoveToFolder = async (savedPromptId: string, folderId: string | null) => {
     const success = await moveToFolder(savedPromptId, folderId)
@@ -299,6 +310,9 @@ export default function LibraryPage() {
         {/* Results */}
         {!error && (
           <>
+            {/* Time Saved Banner */}
+            <TimeSavedBanner copyCounts={copyCounts} />
+
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
               Showing {filteredPrompts.length} prompt{filteredPrompts.length !== 1 ? 's' : ''}
             </p>
@@ -311,6 +325,7 @@ export default function LibraryPage() {
                     key={prompt.id}
                     prompt={prompt}
                     userId={userId}
+                    onCopy={handleCopy}
                     folders={folders}
                     currentFolderId={getFolderId(prompt.id)}
                     savedPromptId={getSavedPromptId(prompt.id)}

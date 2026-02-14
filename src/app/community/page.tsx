@@ -1,14 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { FilterTabs } from '@/components/ui/FilterTabs'
 import { PromptCard } from '@/components/prompts/PromptCard'
+import { ViewSwitcher, type LibraryView } from '@/components/ui/ViewSwitcher'
+import { PromptListView } from '@/components/prompts/PromptListView'
+import { PromptTableView, type SortColumn } from '@/components/prompts/PromptTableView'
+import { PromptKanbanView } from '@/components/prompts/PromptKanbanView'
+import { TimeSavedBanner } from '@/components/ui/TimeSavedBanner'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { AlertCircle, Globe, Heart, Lock, ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useUserProfile } from '@/hooks/useUserProfile'
-import { ROLE_CATEGORY_MAP } from '@/lib/constants'
+import { ROLE_CATEGORY_MAP, CATEGORY_TIME_SAVED } from '@/lib/constants'
+import { posthog } from '@/lib/posthog'
 import type { Prompt } from '@/types'
 
 const categories = ['Planning', 'Communication', 'Reporting', 'Risk', 'Stakeholder', 'Agile', 'Meetings']
@@ -20,10 +27,32 @@ export default function CommunityPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const [view, setView] = useLocalStorage<LibraryView>('pv-community-view', 'grid')
+  const [sortColumn, setSortColumn] = useState<SortColumn>('created_at')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [copyCounts, setCopyCounts] = useLocalStorage<Record<string, number>>('pv-copy-counts', {})
   const { profile } = useUserProfile()
 
   // Get suggested categories based on user role
   const suggestedCategories = profile?.role ? ROLE_CATEGORY_MAP[profile.role] || [] : []
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortColumn(column)
+      setSortDirection('asc')
+    }
+  }
+
+  const handleCopy = useCallback((_content: string, category: string) => {
+    setCopyCounts(prev => ({
+      ...prev,
+      [category.toLowerCase()]: (prev[category.toLowerCase()] || 0) + 1,
+    }))
+    const minutesSaved = CATEGORY_TIME_SAVED[category.toLowerCase()] || 10
+    posthog.capture('time_saved', { category, minutes: minutesSaved })
+  }, [setCopyCounts])
 
   useEffect(() => {
     async function fetchData() {
@@ -64,6 +93,23 @@ export default function CommunityPage() {
     return matchesSearch && matchesCategory
   })
 
+  // Apply sorting
+  const sortedPrompts = [...filteredPrompts].sort((a, b) => {
+    const dir = sortDirection === 'asc' ? 1 : -1
+    switch (sortColumn) {
+      case 'title':
+        return dir * a.title.localeCompare(b.title)
+      case 'category':
+        return dir * a.category.localeCompare(b.category)
+      case 'use_count':
+        return dir * (a.use_count - b.use_count)
+      case 'created_at':
+        return dir * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      default:
+        return 0
+    }
+  })
+
   return (
     <div className="min-h-screen pt-24 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,14 +138,15 @@ export default function CommunityPage() {
           </div>
         </div>
 
-        {/* Search and Filters */}
+        {/* Search, Filters, and View Switcher */}
         <div className="flex flex-col gap-6 mb-8">
-          <div className="flex justify-center">
+          <div className="flex items-center justify-center gap-3">
             <SearchBar
               value={searchQuery}
               onChange={setSearchQuery}
               placeholder="Search community prompts..."
             />
+            <ViewSwitcher view={view} onChange={(v) => { setView(v); posthog.capture('view_changed', { view: v, page: 'community' }) }} />
           </div>
           <div className="flex justify-center">
             <FilterTabs
@@ -166,20 +213,45 @@ export default function CommunityPage() {
         {/* Results */}
         {!loading && !error && (
           <>
+            {/* Time Saved Banner */}
+            <TimeSavedBanner copyCounts={copyCounts} />
+
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
               Showing {filteredPrompts.length} community prompt{filteredPrompts.length !== 1 ? 's' : ''}
             </p>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPrompts.map((prompt) => (
-                <PromptCard
-                  key={prompt.id}
-                  prompt={prompt}
-                  showRating
-                  userId={userId}
-                />
-              ))}
-            </div>
+            {/* View rendering */}
+            {view === 'grid' && (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sortedPrompts.map((prompt) => (
+                  <PromptCard
+                    key={prompt.id}
+                    prompt={prompt}
+                    showRating
+                    userId={userId}
+                    onCopy={handleCopy}
+                  />
+                ))}
+              </div>
+            )}
+
+            {view === 'list' && (
+              <PromptListView prompts={sortedPrompts} userId={userId} />
+            )}
+
+            {view === 'table' && (
+              <PromptTableView
+                prompts={sortedPrompts}
+                userId={userId}
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+            )}
+
+            {view === 'kanban' && (
+              <PromptKanbanView prompts={sortedPrompts} userId={userId} categories={categories} />
+            )}
 
             {/* Pro upsell */}
             {!userId && filteredPrompts.length > 0 && (

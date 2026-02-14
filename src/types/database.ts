@@ -203,6 +203,29 @@ export interface Database {
           created_at?: string
         }
       }
+      prompt_feedback: {
+        Row: {
+          id: string
+          prompt_id: string
+          user_id: string | null
+          helpful: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          prompt_id: string
+          user_id?: string | null
+          helpful: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          prompt_id?: string
+          user_id?: string | null
+          helpful?: boolean
+          created_at?: string
+        }
+      }
       prompt_folders: {
         Row: {
           id: string
@@ -250,3 +273,4 @@ export type TeamMember = Database['public']['Tables']['team_members']['Row']
 export type CommunitySubmission = Database['public']['Tables']['community_submissions']['Row']
 export type PromptRating = Database['public']['Tables']['prompt_ratings']['Row']
 export type PromptFolder = Database['public']['Tables']['prompt_folders']['Row']
+export type PromptFeedback = Database['public']['Tables']['prompt_feedback']['Row']
