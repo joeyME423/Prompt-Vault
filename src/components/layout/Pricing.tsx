@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Check, X, Send } from 'lucide-react'
+import { Check, X, Send, Sparkles, Zap } from 'lucide-react'
 
 const CONTACT_EMAIL = 'josephe1994@icloud.com'
 
@@ -24,12 +24,16 @@ const plans = [
     price: '$0',
     period: 'forever',
     description: 'Get started with AI prompts for PM',
+    badge: null,
     features: [
-      'Access to all prompts',
-      'Save up to 10 prompts',
-      'Basic search & filters',
-      'Contribute prompts',
-      'Community support',
+      { text: '1 user', included: true },
+      { text: '5 custom prompts', included: true },
+      { text: 'Public prompt library', included: true },
+      { text: 'Chrome extension', included: true },
+      { text: 'Community support', included: true },
+      { text: 'Team sharing', included: false },
+      { text: 'Analytics dashboard', included: false },
+      { text: 'Priority support', included: false },
     ],
     cta: 'Sign Up Free',
     href: '/auth/signup',
@@ -40,19 +44,21 @@ const plans = [
     name: 'Pro',
     price: '$30',
     period: '/user/month',
-    description: 'For PM teams ready to scale',
+    description: 'For PM teams ready to scale with AI',
+    badge: '14-day free trial',
+    trialNote: 'No credit card required. Asked on day 7.',
     features: [
-      'Everything in Free',
-      'Unlimited saved prompts',
-      'Unlimited team members',
-      'Share prompts with your team',
-      'Team activity stream',
-      'Prompt success rate tracking',
-      'Analytics dashboard',
-      'SSO integration',
-      'Priority support',
+      { text: 'Up to 10 users', included: true },
+      { text: 'Unlimited custom prompts', included: true },
+      { text: 'Everything in Free', included: true },
+      { text: 'Team prompt sharing', included: true },
+      { text: 'Team activity stream', included: true },
+      { text: 'Prompt success tracking', included: true },
+      { text: 'Analytics dashboard', included: true },
+      { text: 'SSO integration', included: true },
+      { text: 'Priority support', included: true },
     ],
-    cta: 'Contact Sales',
+    cta: 'Start Free Trial',
     href: '#',
     popular: true,
     isContact: true,
@@ -64,7 +70,7 @@ function ContactModal({ onClose }: { onClose: () => void }) {
     name: '',
     currentTool: '',
     email: '',
-    plan: 'Team',
+    plan: 'Pro',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -94,7 +100,7 @@ function ContactModal({ onClose }: { onClose: () => void }) {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-dark-border">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-            Contact Sales
+            Start Your Free Trial
           </h2>
           <button
             onClick={onClose}
@@ -114,7 +120,7 @@ function ContactModal({ onClose }: { onClose: () => void }) {
               Thanks for reaching out!
             </h3>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
-              We&apos;ll get back to you shortly.
+              We&apos;ll get back to you shortly with trial access.
             </p>
             <button
               onClick={onClose}
@@ -201,7 +207,7 @@ function ContactModal({ onClose }: { onClose: () => void }) {
                 className="w-full inline-flex items-center justify-center gap-2 py-3 bg-primary-500 hover:bg-primary-600 disabled:bg-primary-500/50 text-white font-medium rounded-xl transition-colors"
               >
                 <Send className="w-4 h-4" />
-                {isSubmitting ? 'Sending...' : 'Send Inquiry'}
+                {isSubmitting ? 'Sending...' : 'Start Free Trial'}
               </button>
             </div>
           </form>
@@ -222,7 +228,7 @@ export function Pricing() {
             Simple, Transparent <span className="gradient-text">Pricing</span>
           </h2>
           <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-            Choose the plan that fits your needs. All plans include a 14-day free trial.
+            Start free, upgrade when you&apos;re ready. Pro includes a 14-day free trial — no credit card required.
           </p>
         </div>
 
@@ -236,10 +242,11 @@ export function Pricing() {
                   : ''
               }`}
             >
-              {plan.popular && (
+              {plan.badge && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="px-4 py-1 bg-primary-500 text-white text-sm font-medium rounded-full">
-                    Most Popular
+                  <span className="inline-flex items-center gap-1.5 px-4 py-1 bg-primary-500 text-white text-sm font-medium rounded-full">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    {plan.badge}
                   </span>
                 </div>
               )}
@@ -259,13 +266,25 @@ export function Pricing() {
                 <p className="text-slate-600 dark:text-slate-400 mt-2">
                   {plan.description}
                 </p>
+                {plan.trialNote && (
+                  <p className="text-xs text-primary-600 dark:text-primary-400 mt-1.5 flex items-center justify-center gap-1">
+                    <Zap className="w-3 h-3" />
+                    {plan.trialNote}
+                  </p>
+                )}
               </div>
 
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-600 dark:text-slate-300">{feature}</span>
+                  <li key={feature.text} className="flex items-start gap-3">
+                    {feature.included ? (
+                      <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <X className="w-5 h-5 text-slate-300 dark:text-slate-600 flex-shrink-0 mt-0.5" />
+                    )}
+                    <span className={feature.included ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}>
+                      {feature.text}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -273,24 +292,27 @@ export function Pricing() {
               {plan.isContact ? (
                 <button
                   onClick={() => setShowContactModal(true)}
-                  className={`block w-full text-center py-3 px-6 rounded-lg font-semibold transition-all btn-secondary`}
+                  className="block w-full text-center py-3 px-6 rounded-lg font-semibold transition-all btn-primary"
                 >
                   {plan.cta}
                 </button>
               ) : (
                 <Link
                   href={plan.href}
-                  className={`block text-center py-3 px-6 rounded-lg font-semibold transition-all ${
-                    plan.popular
-                      ? 'btn-primary w-full'
-                      : 'btn-secondary w-full'
-                  }`}
+                  className="block text-center py-3 px-6 rounded-lg font-semibold transition-all btn-secondary w-full"
                 >
                   {plan.cta}
                 </Link>
               )}
             </div>
           ))}
+        </div>
+
+        {/* After trial info */}
+        <div className="text-center mt-8">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            After trial ends, Pro downgrades to Free automatically. No surprise charges.
+          </p>
         </div>
       </div>
 

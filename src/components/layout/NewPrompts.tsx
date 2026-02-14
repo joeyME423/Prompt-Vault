@@ -77,7 +77,7 @@ export function NewPrompts() {
               Community Prompts
             </h2>
             <p className="text-slate-600 dark:text-slate-400">
-              The latest prompts contributed by the PM community
+              Free and open to everyone &mdash; our way of giving back to the PM community
             </p>
           </div>
           <Link

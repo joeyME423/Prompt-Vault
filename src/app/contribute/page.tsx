@@ -4,22 +4,10 @@ import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Send, Sparkles, Check, Plus, Library, Users, Globe } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import { Database } from '@/types/database'
 import { getToolBySlug } from '@/data/tools'
-
-type PromptInsert = Database['public']['Tables']['prompts']['Insert']
-type CommunityInsert = Database['public']['Tables']['community_submissions']['Insert']
-
-const CATEGORIES = [
-  'Planning',
-  'Execution',
-  'Risk Management',
-  'Communication',
-  'Reporting',
-  'Agile',
-  'Meetings',
-]
+import { useAuthState } from '@/hooks/useAuthState'
+import { submitPrompt } from '@/lib/prompts/submitPrompt'
+import { CATEGORIES } from '@/lib/constants'
 
 const PM_TOOLS = [
   'Wrike',
@@ -77,34 +65,7 @@ function ContributeForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [authChecked, setAuthChecked] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [teamId, setTeamId] = useState<string | null>(null)
-
-  // Check auth state and get team
-  useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (session) {
-        setUserId(session.user.id)
-        // Get user's team
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: membership } = await (supabase.from('team_members') as any)
-          .select('team_id')
-          .eq('user_id', session.user.id)
-          .limit(1)
-          .maybeSingle()
-
-        if (membership) {
-          setTeamId(membership.team_id)
-        }
-      }
-      setAuthChecked(true)
-    }
-    checkAuth()
-  }, [])
+  const { userId, teamId, authChecked } = useAuthState()
 
   // Update pmTools when preselectedTool changes
   useEffect(() => {
@@ -141,8 +102,6 @@ function ContributeForm() {
     setSubmitError('')
 
     try {
-      const supabase = createClient()
-
       const tagList = formData.tags
         .split(',')
         .map((tag) => tag.trim())
@@ -150,35 +109,16 @@ function ContributeForm() {
       const toolTags = formData.pmTools.map((tool) => `tool:${tool}`)
       const allTags = [...tagList, ...toolTags]
 
-      if (isLoggedIn && teamId) {
-        // Team prompt — private to the user's team
-        const promptData: PromptInsert = {
-          title: formData.title.trim(),
-          description: formData.description.trim(),
-          content: formData.content.trim(),
-          category: formData.category,
-          tags: allTags,
-          author_id: userId,
-          team_id: teamId,
-          is_public: false,
-        }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await (supabase.from('prompts') as any).insert(promptData)
-        if (error) throw error
-      } else {
-        // Community submission — goes through review
-        const submissionData: CommunityInsert = {
-          title: formData.title.trim(),
-          description: formData.description.trim(),
-          content: formData.content.trim(),
-          category: formData.category,
-          tags: allTags,
-          submitter_email: formData.email.trim(),
-        }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await (supabase.from('community_submissions') as any).insert(submissionData)
-        if (error) throw error
-      }
+      await submitPrompt({
+        title: formData.title,
+        description: formData.description,
+        content: formData.content,
+        category: formData.category,
+        tags: allTags,
+        email: formData.email || undefined,
+        userId,
+        teamId,
+      })
 
       setIsSuccess(true)
     } catch (error) {

@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { FilterTabs } from '@/components/ui/FilterTabs'
 import { PromptCard } from '@/components/prompts/PromptCard'
-import { AlertCircle, Globe } from 'lucide-react'
+import { AlertCircle, Globe, Heart, Lock, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { Prompt } from '@/types'
 
@@ -74,6 +75,15 @@ export default function CommunityPage() {
           <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
             Prompts contributed and rated by the PM community. Browse, rate, and save your favorites.
           </p>
+          <div className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-500/5 border border-primary-500/10">
+            <Heart className="w-4 h-4 text-primary-500" />
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Free and open to everyone. We believe great prompts should be accessible to all PMs &mdash; and we&apos;ll keep it that way for as long as we can.{' '}
+              <Link href="/contribute" className="text-primary-500 hover:text-primary-600 font-medium">
+                Contribute yours
+              </Link>
+            </p>
+          </div>
         </div>
 
         {/* Search and Filters */}
@@ -135,6 +145,32 @@ export default function CommunityPage() {
                 />
               ))}
             </div>
+
+            {/* Pro upsell */}
+            {!userId && filteredPrompts.length > 0 && (
+              <div className="mt-12 p-6 rounded-2xl bg-gradient-to-r from-primary-500/5 via-accent-purple/5 to-accent-blue/5 border border-primary-500/10">
+                <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary-500/10 flex items-center justify-center">
+                    <Lock className="w-6 h-6 text-primary-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
+                      Want to keep prompts private to your team?
+                    </h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Sign up for Pro to create a private team library, organize prompts in folders, and collaborate with your team &mdash; all in one place.
+                    </p>
+                  </div>
+                  <Link
+                    href="/#pricing"
+                    className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors"
+                  >
+                    View Pro
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {filteredPrompts.length === 0 && (
               <div className="text-center py-12">

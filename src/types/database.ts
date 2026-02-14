@@ -55,18 +55,21 @@ export interface Database {
           id: string
           user_id: string
           prompt_id: string
+          folder_id: string | null
           created_at: string
         }
         Insert: {
           id?: string
           user_id: string
           prompt_id: string
+          folder_id?: string | null
           created_at?: string
         }
         Update: {
           id?: string
           user_id?: string
           prompt_id?: string
+          folder_id?: string | null
           created_at?: string
         }
       }
@@ -197,6 +200,32 @@ export interface Database {
           created_at?: string
         }
       }
+      prompt_folders: {
+        Row: {
+          id: string
+          name: string
+          user_id: string
+          team_id: string | null
+          color: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          user_id: string
+          team_id?: string | null
+          color?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          user_id?: string
+          team_id?: string | null
+          color?: string
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -217,3 +246,4 @@ export type Team = Database['public']['Tables']['teams']['Row']
 export type TeamMember = Database['public']['Tables']['team_members']['Row']
 export type CommunitySubmission = Database['public']['Tables']['community_submissions']['Row']
 export type PromptRating = Database['public']['Tables']['prompt_ratings']['Row']
+export type PromptFolder = Database['public']['Tables']['prompt_folders']['Row']

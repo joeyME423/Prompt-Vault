@@ -5,13 +5,19 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { StarRating } from './StarRating'
-import type { Prompt } from '@/types'
+import { FolderDropdown } from './FolderDropdown'
+import type { Prompt, PromptFolder } from '@/types'
 
 interface PromptCardProps {
   prompt: Prompt
   showRating?: boolean
   userId?: string | null
   onCopy?: (content: string) => void
+  folders?: PromptFolder[]
+  currentFolderId?: string | null
+  onMoveToFolder?: (savedPromptId: string, folderId: string | null) => Promise<boolean>
+  onCreateFolder?: (name: string) => Promise<PromptFolder | null>
+  savedPromptId?: string | null
 }
 
 const FREE_SAVE_LIMIT = 10
@@ -25,7 +31,7 @@ const categoryColors: Record<string, string> = {
   default: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300',
 }
 
-export function PromptCard({ prompt, showRating = false, userId: externalUserId, onCopy }: PromptCardProps) {
+export function PromptCard({ prompt, showRating = false, userId: externalUserId, onCopy, folders, currentFolderId, onMoveToFolder, onCreateFolder, savedPromptId }: PromptCardProps) {
   const [copied, setCopied] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -231,6 +237,18 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
               {tag}
             </span>
           ))}
+        </div>
+      )}
+
+      {/* Folder dropdown (when folders are available) */}
+      {folders && onMoveToFolder && onCreateFolder && savedPromptId && (
+        <div className="mb-3">
+          <FolderDropdown
+            folders={folders}
+            currentFolderId={currentFolderId ?? null}
+            onMove={(folderId) => onMoveToFolder(savedPromptId, folderId)}
+            onCreate={onCreateFolder}
+          />
         </div>
       )}
 

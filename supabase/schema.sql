@@ -55,6 +55,19 @@ create table public.saved_prompts (
   unique(user_id, prompt_id)
 );
 
+-- Prompt folders table
+create table public.prompt_folders (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  team_id uuid references public.teams(id) on delete cascade,
+  color text not null default '#3b82f6',
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Add folder_id to saved_prompts (nullable — null means "unsorted")
+alter table public.saved_prompts add column if not exists folder_id uuid references public.prompt_folders(id) on delete set null;
+
 -- Community submissions table (pending review)
 create table public.community_submissions (
   id uuid default uuid_generate_v4() primary key,
@@ -87,6 +100,7 @@ alter table public.prompts enable row level security;
 alter table public.saved_prompts enable row level security;
 alter table public.community_submissions enable row level security;
 alter table public.prompt_ratings enable row level security;
+alter table public.prompt_folders enable row level security;
 
 -- Profiles policies
 create policy "Public profiles are viewable by everyone"
@@ -185,6 +199,23 @@ create policy "Users can update own rating"
   on public.prompt_ratings for update
   using (auth.uid() = user_id);
 
+-- Prompt folders policies
+create policy "Users can view own folders"
+  on public.prompt_folders for select
+  using (auth.uid() = user_id);
+
+create policy "Users can create folders"
+  on public.prompt_folders for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update own folders"
+  on public.prompt_folders for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete own folders"
+  on public.prompt_folders for delete
+  using (auth.uid() = user_id);
+
 -- Function to handle new user signup (creates profile + personal team)
 create or replace function public.handle_new_user()
 returns trigger as $$
@@ -240,3 +271,5 @@ create index team_members_team_id_idx on public.team_members(team_id);
 create index community_submissions_status_idx on public.community_submissions(status);
 create index prompt_ratings_prompt_id_idx on public.prompt_ratings(prompt_id);
 create index prompt_ratings_user_id_idx on public.prompt_ratings(user_id);
+create index prompt_folders_user_id_idx on public.prompt_folders(user_id);
+create index saved_prompts_folder_id_idx on public.saved_prompts(folder_id);

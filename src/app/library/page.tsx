@@ -1,16 +1,29 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { FilterTabs } from '@/components/ui/FilterTabs'
 import { PromptCard } from '@/components/prompts/PromptCard'
+import { ViewSwitcher, type LibraryView } from '@/components/ui/ViewSwitcher'
+import { PromptListView } from '@/components/prompts/PromptListView'
+import { PromptTableView, type SortColumn } from '@/components/prompts/PromptTableView'
+import { PromptKanbanView } from '@/components/prompts/PromptKanbanView'
+import { FolderSidebar } from '@/components/prompts/FolderSidebar'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useFolders } from '@/hooks/useFolders'
 import { AlertCircle, Users, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { Prompt } from '@/types'
 
 const categories = ['Planning', 'Communication', 'Reporting', 'Risk', 'Stakeholder', 'Agile', 'Meetings']
+
+interface SavedPromptMapping {
+  id: string
+  prompt_id: string
+  folder_id: string | null
+}
 
 export default function LibraryPage() {
   const router = useRouter()
@@ -21,6 +34,22 @@ export default function LibraryPage() {
   const [error, setError] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [teamName, setTeamName] = useState('')
+  const [view, setView] = useLocalStorage<LibraryView>('pv-library-view', 'grid')
+  const [sortColumn, setSortColumn] = useState<SortColumn>('created_at')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [activeFolder, setActiveFolder] = useState<string | null>(null) // null = All, 'unsorted' = no folder
+  const [savedMappings, setSavedMappings] = useState<SavedPromptMapping[]>([])
+
+  const { folders, createFolder, deleteFolder, moveToFolder } = useFolders(userId)
+
+  const fetchSavedMappings = useCallback(async (uid: string) => {
+    const supabase = createClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase.from('saved_prompts') as any)
+      .select('id, prompt_id, folder_id')
+      .eq('user_id', uid)
+    setSavedMappings(data || [])
+  }, [])
 
   useEffect(() => {
     async function fetchTeamPrompts() {
@@ -70,11 +99,34 @@ export default function LibraryPage() {
       } else {
         setPrompts(data || [])
       }
+
+      // Fetch saved prompt mappings for folder filtering
+      await fetchSavedMappings(session.user.id)
+
       setLoading(false)
     }
 
     fetchTeamPrompts()
-  }, [router])
+  }, [router, fetchSavedMappings])
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortColumn(column)
+      setSortDirection('asc')
+    }
+  }
+
+  const handleMoveToFolder = async (savedPromptId: string, folderId: string | null) => {
+    const success = await moveToFolder(savedPromptId, folderId)
+    if (success) {
+      setSavedMappings(prev =>
+        prev.map(m => m.id === savedPromptId ? { ...m, folder_id: folderId } : m)
+      )
+    }
+    return success
+  }
 
   const filteredPrompts = prompts.filter((prompt) => {
     const matchesSearch =
@@ -85,8 +137,43 @@ export default function LibraryPage() {
 
     const matchesCategory = activeCategory === null || prompt.category === activeCategory
 
-    return matchesSearch && matchesCategory
+    // Folder filtering
+    let matchesFolder = true
+    if (activeFolder === 'unsorted') {
+      const mapping = savedMappings.find(m => m.prompt_id === prompt.id)
+      matchesFolder = !mapping || mapping.folder_id === null
+    } else if (activeFolder !== null) {
+      const mapping = savedMappings.find(m => m.prompt_id === prompt.id)
+      matchesFolder = mapping?.folder_id === activeFolder
+    }
+
+    return matchesSearch && matchesCategory && matchesFolder
   })
+
+  // Apply sorting
+  const sortedPrompts = [...filteredPrompts].sort((a, b) => {
+    const dir = sortDirection === 'asc' ? 1 : -1
+    switch (sortColumn) {
+      case 'title':
+        return dir * a.title.localeCompare(b.title)
+      case 'category':
+        return dir * a.category.localeCompare(b.category)
+      case 'use_count':
+        return dir * (a.use_count - b.use_count)
+      case 'created_at':
+        return dir * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      default:
+        return 0
+    }
+  })
+
+  const getSavedPromptId = (promptId: string) => {
+    return savedMappings.find(m => m.prompt_id === promptId)?.id ?? null
+  }
+
+  const getFolderId = (promptId: string) => {
+    return savedMappings.find(m => m.prompt_id === promptId)?.folder_id ?? null
+  }
 
   if (loading) {
     return (
@@ -129,14 +216,15 @@ export default function LibraryPage() {
           </p>
         </div>
 
-        {/* Search and Filters */}
+        {/* Search, Filters, and View Switcher */}
         <div className="flex flex-col gap-6 mb-8">
-          <div className="flex justify-center">
+          <div className="flex items-center justify-center gap-3">
             <SearchBar
               value={searchQuery}
               onChange={setSearchQuery}
               placeholder="Search your team's prompts..."
             />
+            <ViewSwitcher view={view} onChange={setView} />
           </div>
           <div className="flex justify-center">
             <FilterTabs
@@ -146,6 +234,15 @@ export default function LibraryPage() {
             />
           </div>
         </div>
+
+        {/* Folder bar */}
+        <FolderSidebar
+          folders={folders}
+          activeFolder={activeFolder}
+          onSelect={setActiveFolder}
+          onCreate={createFolder}
+          onDelete={deleteFolder}
+        />
 
         {/* Error */}
         {error && (
@@ -164,14 +261,44 @@ export default function LibraryPage() {
               Showing {filteredPrompts.length} prompt{filteredPrompts.length !== 1 ? 's' : ''}
             </p>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPrompts.map((prompt) => (
-                <PromptCard key={prompt.id} prompt={prompt} userId={userId} />
-              ))}
-            </div>
+            {/* View rendering */}
+            {view === 'grid' && (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sortedPrompts.map((prompt) => (
+                  <PromptCard
+                    key={prompt.id}
+                    prompt={prompt}
+                    userId={userId}
+                    folders={folders}
+                    currentFolderId={getFolderId(prompt.id)}
+                    savedPromptId={getSavedPromptId(prompt.id)}
+                    onMoveToFolder={handleMoveToFolder}
+                    onCreateFolder={createFolder}
+                  />
+                ))}
+              </div>
+            )}
+
+            {view === 'list' && (
+              <PromptListView prompts={sortedPrompts} userId={userId} />
+            )}
+
+            {view === 'table' && (
+              <PromptTableView
+                prompts={sortedPrompts}
+                userId={userId}
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+            )}
+
+            {view === 'kanban' && (
+              <PromptKanbanView prompts={sortedPrompts} userId={userId} categories={categories} />
+            )}
 
             {/* Empty state */}
-            {filteredPrompts.length === 0 && searchQuery === '' && activeCategory === null && (
+            {filteredPrompts.length === 0 && searchQuery === '' && activeCategory === null && activeFolder === null && (
               <div className="text-center py-16">
                 <div className="w-16 h-16 bg-slate-100 dark:bg-dark-surface rounded-full flex items-center justify-center mx-auto mb-4">
                   <Users className="w-8 h-8 text-slate-400" />
@@ -192,7 +319,7 @@ export default function LibraryPage() {
               </div>
             )}
 
-            {filteredPrompts.length === 0 && (searchQuery !== '' || activeCategory !== null) && (
+            {filteredPrompts.length === 0 && (searchQuery !== '' || activeCategory !== null || activeFolder !== null) && (
               <div className="text-center py-12">
                 <p className="text-slate-500 dark:text-slate-400">
                   No prompts found matching your criteria.
