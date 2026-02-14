@@ -79,6 +79,7 @@ export interface Database {
           email: string
           full_name: string | null
           avatar_url: string | null
+          role: string | null
           created_at: string
         }
         Insert: {
@@ -86,6 +87,7 @@ export interface Database {
           email: string
           full_name?: string | null
           avatar_url?: string | null
+          role?: string | null
           created_at?: string
         }
         Update: {
@@ -93,6 +95,7 @@ export interface Database {
           email?: string
           full_name?: string | null
           avatar_url?: string | null
+          role?: string | null
           created_at?: string
         }
       }

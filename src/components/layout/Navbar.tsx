@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useTheme } from './ThemeProvider'
 import { useAuthState } from '@/hooks/useAuthState'
 import { createClient } from '@/lib/supabase/client'
+import { posthog } from '@/lib/posthog'
 import { PM_TOOLS } from '@/data/tools'
 
 export function Navbar() {
@@ -31,6 +32,8 @@ export function Navbar() {
 
   const handleLogout = async () => {
     const supabase = createClient()
+    posthog.capture('logout')
+    posthog.reset()
     await supabase.auth.signOut()
     setIsMenuOpen(false)
     router.push('/')

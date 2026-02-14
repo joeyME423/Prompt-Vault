@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Sparkles, Mail, Lock, User, Briefcase } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { posthog } from '@/lib/posthog'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -32,6 +33,7 @@ export default function SignupPage() {
 
       if (signUpError) throw signUpError
 
+      posthog.capture('signup_completed', { pm_platform: pmPlatform })
       router.push('/library')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong'

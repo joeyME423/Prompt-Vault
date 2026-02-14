@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { FilterTabs } from '@/components/ui/FilterTabs'
 import { PromptCard } from '@/components/prompts/PromptCard'
-import { AlertCircle, Globe, Heart, Lock, ArrowRight } from 'lucide-react'
+import { AlertCircle, Globe, Heart, Lock, ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { useUserProfile } from '@/hooks/useUserProfile'
+import { ROLE_CATEGORY_MAP } from '@/lib/constants'
 import type { Prompt } from '@/types'
 
 const categories = ['Planning', 'Communication', 'Reporting', 'Risk', 'Stakeholder', 'Agile', 'Meetings']
@@ -18,6 +20,10 @@ export default function CommunityPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const { profile } = useUserProfile()
+
+  // Get suggested categories based on user role
+  const suggestedCategories = profile?.role ? ROLE_CATEGORY_MAP[profile.role] || [] : []
 
   useEffect(() => {
     async function fetchData() {
@@ -127,6 +133,35 @@ export default function CommunityPage() {
             </p>
           </div>
         )}
+
+        {/* Suggested for you */}
+        {!loading && !error && suggestedCategories.length > 0 && searchQuery === '' && activeCategory === null && (() => {
+          const suggested = filteredPrompts.filter(p =>
+            suggestedCategories.some(c => p.category.toLowerCase() === c.toLowerCase())
+          ).slice(0, 3)
+          if (suggested.length === 0) return null
+          return (
+            <div className="mb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-4 h-4 text-primary-500" />
+                <h2 className="text-sm font-semibold text-primary-600 dark:text-primary-400 uppercase tracking-wide">
+                  Suggested for {profile?.role}s
+                </h2>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {suggested.map((prompt) => (
+                  <PromptCard
+                    key={`suggested-${prompt.id}`}
+                    prompt={prompt}
+                    showRating
+                    userId={userId}
+                  />
+                ))}
+              </div>
+              <hr className="mt-10 border-slate-200 dark:border-dark-border" />
+            </div>
+          )
+        })()}
 
         {/* Results */}
         {!loading && !error && (

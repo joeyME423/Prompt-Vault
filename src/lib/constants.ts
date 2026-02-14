@@ -8,6 +8,26 @@ export const CATEGORIES = [
   'Meetings',
 ]
 
+export const PM_ROLES = [
+  'Product Manager',
+  'Scrum Master',
+  'Program Manager',
+  'Engineering Manager',
+  'Project Coordinator',
+  'Other',
+] as const
+
+export type PMRole = typeof PM_ROLES[number]
+
+export const ROLE_CATEGORY_MAP: Record<string, string[]> = {
+  'Product Manager': ['Planning', 'Reporting', 'Stakeholder'],
+  'Scrum Master': ['Agile', 'Meetings', 'Execution'],
+  'Program Manager': ['Risk Management', 'Communication', 'Reporting'],
+  'Engineering Manager': ['Planning', 'Execution', 'Communication'],
+  'Project Coordinator': ['Meetings', 'Planning', 'Communication'],
+  'Other': [],
+}
+
 export const categoryColors: Record<string, string> = {
   planning: 'bg-accent-blue/10 text-accent-blue',
   execution: 'bg-primary-500/10 text-primary-500',

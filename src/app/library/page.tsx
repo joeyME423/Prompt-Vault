@@ -12,9 +12,12 @@ import { PromptKanbanView } from '@/components/prompts/PromptKanbanView'
 import { FolderSidebar } from '@/components/prompts/FolderSidebar'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { useFolders } from '@/hooks/useFolders'
-import { AlertCircle, Users, Plus } from 'lucide-react'
+import { AlertCircle, Users, Plus, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { useUserProfile } from '@/hooks/useUserProfile'
+import { ROLE_CATEGORY_MAP } from '@/lib/constants'
+import { posthog } from '@/lib/posthog'
 import type { Prompt } from '@/types'
 
 const categories = ['Planning', 'Communication', 'Reporting', 'Risk', 'Stakeholder', 'Agile', 'Meetings']
@@ -41,6 +44,10 @@ export default function LibraryPage() {
   const [savedMappings, setSavedMappings] = useState<SavedPromptMapping[]>([])
 
   const { folders, createFolder, deleteFolder, moveToFolder } = useFolders(userId)
+  const { profile } = useUserProfile()
+
+  // Get suggested categories based on user role
+  const suggestedCategories = profile?.role ? ROLE_CATEGORY_MAP[profile.role] || [] : []
 
   const fetchSavedMappings = useCallback(async (uid: string) => {
     const supabase = createClient()
@@ -224,7 +231,7 @@ export default function LibraryPage() {
               onChange={setSearchQuery}
               placeholder="Search your team's prompts..."
             />
-            <ViewSwitcher view={view} onChange={setView} />
+            <ViewSwitcher view={view} onChange={(v) => { setView(v); posthog.capture('view_changed', { view: v }) }} />
           </div>
           <div className="flex justify-center">
             <FilterTabs
@@ -252,6 +259,41 @@ export default function LibraryPage() {
               Unable to load your team prompts. Please try again later.
             </p>
           </div>
+        )}
+
+        {/* Suggested for you */}
+        {!error && suggestedCategories.length > 0 && searchQuery === '' && activeCategory === null && activeFolder === null && (
+          (() => {
+            const suggested = sortedPrompts.filter(p =>
+              suggestedCategories.some(c => p.category.toLowerCase() === c.toLowerCase())
+            ).slice(0, 3)
+            if (suggested.length === 0) return null
+            return (
+              <div className="mb-10">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-4 h-4 text-primary-500" />
+                  <h2 className="text-sm font-semibold text-primary-600 dark:text-primary-400 uppercase tracking-wide">
+                    Suggested for {profile?.role}s
+                  </h2>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {suggested.map((prompt) => (
+                    <PromptCard
+                      key={`suggested-${prompt.id}`}
+                      prompt={prompt}
+                      userId={userId}
+                      folders={folders}
+                      currentFolderId={getFolderId(prompt.id)}
+                      savedPromptId={getSavedPromptId(prompt.id)}
+                      onMoveToFolder={handleMoveToFolder}
+                      onCreateFolder={createFolder}
+                    />
+                  ))}
+                </div>
+                <hr className="mt-10 border-slate-200 dark:border-dark-border" />
+              </div>
+            )
+          })()
         )}
 
         {/* Results */}

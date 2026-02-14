@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { posthog } from '@/lib/posthog'
 import type { PromptFolder } from '@/types'
 
 const FOLDER_COLORS = [
@@ -46,6 +47,7 @@ export function useFolders(userId: string | null) {
       return null
     }
     setFolders(prev => [...prev, data])
+    posthog.capture('folder_created', { folder_name: name })
     return data as PromptFolder
   }
 

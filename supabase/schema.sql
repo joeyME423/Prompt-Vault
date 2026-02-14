@@ -10,6 +10,7 @@ create table public.profiles (
   email text not null,
   full_name text,
   avatar_url text,
+  role text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -172,6 +173,10 @@ create policy "Users can view own saved prompts"
 create policy "Users can save prompts"
   on public.saved_prompts for insert
   with check (auth.uid() = user_id);
+
+create policy "Users can update own saved prompts"
+  on public.saved_prompts for update
+  using (auth.uid() = user_id);
 
 create policy "Users can unsave prompts"
   on public.saved_prompts for delete

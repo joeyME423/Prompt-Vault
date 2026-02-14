@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { StarRating } from './StarRating'
 import { FolderDropdown } from './FolderDropdown'
+import { posthog } from '@/lib/posthog'
 import type { Prompt, PromptFolder } from '@/types'
 
 interface PromptCardProps {
@@ -122,6 +123,7 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
     await navigator.clipboard.writeText(prompt.content)
     setCopied(true)
     onCopy?.(prompt.content)
+    posthog.capture('prompt_copied', { prompt_id: prompt.id, category: prompt.category, title: prompt.title })
     setTimeout(() => setCopied(false), 2000)
   }
 
@@ -153,6 +155,7 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
           .insert({ user_id: userId, prompt_id: prompt.id })
         setSaved(true)
         setSaveCount((c) => c + 1)
+        posthog.capture('prompt_saved', { prompt_id: prompt.id, category: prompt.category })
       }
     } catch (error) {
       console.error('Error saving prompt:', error)

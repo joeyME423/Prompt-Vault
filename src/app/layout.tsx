@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { Suspense } from 'react'
 import './globals.css'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { Navbar } from '@/components/layout/Navbar'
+import { PostHogProvider } from '@/components/providers/PostHogProvider'
+import { RolePickerModal } from '@/components/ui/RolePickerModal'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,8 +23,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
-          <Navbar />
-          <main>{children}</main>
+          <Suspense fallback={null}>
+            <PostHogProvider>
+              <Navbar />
+              <RolePickerModal />
+              <main>{children}</main>
+            </PostHogProvider>
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>
