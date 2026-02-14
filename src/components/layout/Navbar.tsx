@@ -1,13 +1,18 @@
 'use client'
 
 import Link from 'next/link'
-import { Moon, Sun, Menu, X, Sparkles, Plus, ChevronDown, Brain } from 'lucide-react'
+import { Moon, Sun, Menu, X, Sparkles, Plus, ChevronDown, Brain, LogOut, User } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTheme } from './ThemeProvider'
+import { useAuthState } from '@/hooks/useAuthState'
+import { createClient } from '@/lib/supabase/client'
 import { PM_TOOLS } from '@/data/tools'
 
 export function Navbar() {
   const { theme, toggleTheme } = useTheme()
+  const { isLoggedIn, authChecked } = useAuthState()
+  const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isToolsOpen, setIsToolsOpen] = useState(false)
   const [isMobileToolsOpen, setIsMobileToolsOpen] = useState(false)
@@ -23,6 +28,14 @@ export function Navbar() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setIsMenuOpen(false)
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass">
@@ -132,12 +145,33 @@ export function Navbar() {
             >
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <Link href="/auth/login" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
-              Log in
-            </Link>
-            <Link href="/auth/signup" className="btn-primary text-sm">
-              Get Started
-            </Link>
+            {authChecked && isLoggedIn ? (
+              <>
+                <Link
+                  href="/library"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-hover transition-colors"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="text-sm">My Library</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="text-sm">Logout</span>
+                </button>
+              </>
+            ) : authChecked ? (
+              <>
+                <Link href="/auth/login" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
+                  Log in
+                </Link>
+                <Link href="/auth/signup" className="btn-primary text-sm">
+                  Get Started
+                </Link>
+              </>
+            ) : null}
           </div>
 
           {/* Mobile menu button */}
@@ -207,17 +241,34 @@ export function Navbar() {
               Contribute Prompt
             </Link>
             <hr className="border-slate-200 dark:border-dark-border" />
-            <div className="flex items-center justify-between">
-              <Link href="/auth/login" className="text-slate-600 dark:text-slate-300">
-                Log in
-              </Link>
-              <button onClick={toggleTheme} className="p-2 rounded-lg text-slate-600 dark:text-slate-300">
-                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-            </div>
-            <Link href="/auth/signup" className="btn-primary block text-center text-sm">
-              Get Started
-            </Link>
+            {authChecked && isLoggedIn ? (
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+                <button onClick={toggleTheme} className="p-2 rounded-lg text-slate-600 dark:text-slate-300">
+                  {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </button>
+              </div>
+            ) : authChecked ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <Link href="/auth/login" className="text-slate-600 dark:text-slate-300">
+                    Log in
+                  </Link>
+                  <button onClick={toggleTheme} className="p-2 rounded-lg text-slate-600 dark:text-slate-300">
+                    {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  </button>
+                </div>
+                <Link href="/auth/signup" className="btn-primary block text-center text-sm">
+                  Get Started
+                </Link>
+              </>
+            ) : null}
           </div>
         </div>
       )}
