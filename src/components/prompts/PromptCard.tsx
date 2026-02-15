@@ -20,6 +20,7 @@ interface PromptCardProps {
   onMoveToFolder?: (savedPromptId: string, folderId: string | null) => Promise<boolean>
   onCreateFolder?: (name: string) => Promise<PromptFolder | null>
   savedPromptId?: string | null
+  onSaveChange?: (promptId: string, saved: boolean, savedPromptId?: string) => void
 }
 
 const FREE_SAVE_LIMIT = 10
@@ -33,7 +34,7 @@ const categoryColors: Record<string, string> = {
   default: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300',
 }
 
-export function PromptCard({ prompt, showRating = false, userId: externalUserId, onCopy, folders, currentFolderId, onMoveToFolder, onCreateFolder, savedPromptId }: PromptCardProps) {
+export function PromptCard({ prompt, showRating = false, userId: externalUserId, onCopy, folders, currentFolderId, onMoveToFolder, onCreateFolder, savedPromptId, onSaveChange }: PromptCardProps) {
   const [copied, setCopied] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -166,13 +167,17 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
           .eq('prompt_id', prompt.id)
         setSaved(false)
         setSaveCount((c) => c - 1)
+        onSaveChange?.(prompt.id, false)
       } else {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase.from('saved_prompts') as any)
+        const { data: newSaved } = await (supabase.from('saved_prompts') as any)
           .insert({ user_id: userId, prompt_id: prompt.id })
+          .select('id')
+          .single()
         setSaved(true)
         setSaveCount((c) => c + 1)
         posthog.capture('prompt_saved', { prompt_id: prompt.id, category: prompt.category })
+        onSaveChange?.(prompt.id, true, newSaved?.id)
       }
     } catch (error) {
       console.error('Error saving prompt:', error)

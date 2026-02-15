@@ -10,6 +10,7 @@ import { PromptTableView, type SortColumn } from '@/components/prompts/PromptTab
 import { PromptKanbanView } from '@/components/prompts/PromptKanbanView'
 import { TimeSavedBanner } from '@/components/ui/TimeSavedBanner'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useFolders } from '@/hooks/useFolders'
 import { AlertCircle, Globe, Heart, Lock, ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -20,6 +21,12 @@ import type { Prompt } from '@/types'
 
 const categories = ['Planning', 'Communication', 'Reporting', 'Risk', 'Stakeholder', 'Agile', 'Meetings']
 
+interface SavedPromptMapping {
+  id: string
+  prompt_id: string
+  folder_id: string | null
+}
+
 export default function CommunityPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
@@ -27,11 +34,14 @@ export default function CommunityPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const [isPaidUser, setIsPaidUser] = useState(false)
   const [view, setView] = useLocalStorage<LibraryView>('pv-community-view', 'grid')
   const [sortColumn, setSortColumn] = useState<SortColumn>('created_at')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [copyCounts, setCopyCounts] = useLocalStorage<Record<string, number>>('pv-copy-counts', {})
+  const [savedMappings, setSavedMappings] = useState<SavedPromptMapping[]>([])
   const { profile } = useUserProfile()
+  const { folders, createFolder, moveToFolder } = useFolders(isPaidUser ? userId : null)
 
   // Get suggested categories based on user role
   const suggestedCategories = profile?.role ? ROLE_CATEGORY_MAP[profile.role] || [] : []
@@ -60,7 +70,28 @@ export default function CommunityPage() {
 
       // Check auth
       const { data: { session } } = await supabase.auth.getSession()
-      if (session) setUserId(session.user.id)
+      if (session) {
+        setUserId(session.user.id)
+
+        // Check if paid user (has team membership)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: membership } = await (supabase.from('team_members') as any)
+          .select('team_id')
+          .eq('user_id', session.user.id)
+          .limit(1)
+          .maybeSingle()
+
+        if (membership) {
+          setIsPaidUser(true)
+
+          // Fetch saved prompt mappings for folder assignment
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: mappings } = await (supabase.from('saved_prompts') as any)
+            .select('id, prompt_id, folder_id')
+            .eq('user_id', session.user.id)
+          setSavedMappings(mappings || [])
+        }
+      }
 
       // Fetch community prompts (public, no team)
       const { data, error: fetchError } = await supabase
@@ -80,6 +111,32 @@ export default function CommunityPage() {
     }
     fetchData()
   }, [])
+
+  const handleSaveChange = useCallback((promptId: string, saved: boolean, newSavedPromptId?: string) => {
+    if (saved && newSavedPromptId) {
+      setSavedMappings(prev => [...prev, { id: newSavedPromptId, prompt_id: promptId, folder_id: null }])
+    } else {
+      setSavedMappings(prev => prev.filter(m => m.prompt_id !== promptId))
+    }
+  }, [])
+
+  const handleMoveToFolder = async (savedPromptId: string, folderId: string | null) => {
+    const success = await moveToFolder(savedPromptId, folderId)
+    if (success) {
+      setSavedMappings(prev =>
+        prev.map(m => m.id === savedPromptId ? { ...m, folder_id: folderId } : m)
+      )
+    }
+    return success
+  }
+
+  const getSavedPromptId = (promptId: string) => {
+    return savedMappings.find(m => m.prompt_id === promptId)?.id ?? null
+  }
+
+  const getFolderId = (promptId: string) => {
+    return savedMappings.find(m => m.prompt_id === promptId)?.folder_id ?? null
+  }
 
   const filteredPrompts = prompts.filter((prompt) => {
     const matchesSearch =
@@ -230,6 +287,14 @@ export default function CommunityPage() {
                     showRating
                     userId={userId}
                     onCopy={handleCopy}
+                    {...(isPaidUser ? {
+                      folders,
+                      currentFolderId: getFolderId(prompt.id),
+                      savedPromptId: getSavedPromptId(prompt.id),
+                      onMoveToFolder: handleMoveToFolder,
+                      onCreateFolder: createFolder,
+                      onSaveChange: handleSaveChange,
+                    } : {})}
                   />
                 ))}
               </div>
