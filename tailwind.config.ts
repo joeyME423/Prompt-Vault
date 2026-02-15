@@ -10,42 +10,54 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // ClickUp-inspired dark theme colors
-        dark: {
-          bg: '#1a1a2e',
-          surface: '#16213e',
-          card: '#1f2937',
-          border: '#374151',
-          hover: '#2d3748',
+        // Apple-inspired palette
+        apple: {
+          black: '#1d1d1f',
+          blue: '#0071e3',
+          'blue-hover': '#0077ed',
+          gray: {
+            50: '#f5f5f7',
+            100: '#f9f9f9',
+            200: '#e8e8ed',
+            300: '#d2d2d7',
+            400: '#86868b',
+            500: '#6e6e73',
+          },
         },
+        // Keep primary/accent as aliases for backward compat during migration
         primary: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#0071e3',
+          600: '#0077ed',
+          700: '#005bb5',
+          800: '#004a94',
+          900: '#003a75',
         },
         accent: {
-          purple: '#7c3aed',
-          blue: '#3b82f6',
-          pink: '#ec4899',
-          cyan: '#06b6d4',
+          purple: '#6e6e73',
+          blue: '#0071e3',
+          pink: '#86868b',
+          cyan: '#0071e3',
+        },
+        // Dark mode
+        dark: {
+          bg: '#000000',
+          surface: '#161617',
+          card: '#1d1d1f',
+          border: '#424245',
+          hover: '#2c2c2e',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-up': 'slideUp 0.5s ease-out',
-        'slide-in-left': 'slideInLeft 0.6s ease-out',
-        'slide-in-right': 'slideInRight 0.6s ease-out',
-        'float': 'float 3s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.4s ease-out',
+        'slide-up': 'slideUp 0.6s ease-out',
       },
       keyframes: {
         fadeIn: {
@@ -53,20 +65,8 @@ const config: Config = {
           '100%': { opacity: '1' },
         },
         slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        slideInLeft: {
-          '0%': { opacity: '0', transform: 'translateX(-30px)' },
-          '100%': { opacity: '1', transform: 'translateX(0)' },
-        },
-        slideInRight: {
-          '0%': { opacity: '0', transform: 'translateX(30px)' },
-          '100%': { opacity: '1', transform: 'translateX(0)' },
-        },
-        float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-10px)' },
         },
       },
     },

@@ -198,14 +198,14 @@ export default function LibraryPage() {
       <div className="min-h-screen pt-24 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="animate-pulse">
-            <div className="h-10 bg-slate-200 dark:bg-dark-surface rounded w-64 mx-auto mb-4" />
-            <div className="h-5 bg-slate-200 dark:bg-dark-surface rounded w-96 mx-auto mb-12" />
+            <div className="h-10 bg-apple-gray-200 dark:bg-dark-surface rounded w-64 mx-auto mb-4" />
+            <div className="h-5 bg-apple-gray-200 dark:bg-dark-surface rounded w-96 mx-auto mb-12" />
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="card p-6 animate-pulse">
-                  <div className="h-6 bg-slate-200 dark:bg-dark-surface rounded w-24 mb-4" />
-                  <div className="h-5 bg-slate-200 dark:bg-dark-surface rounded w-3/4 mb-2" />
-                  <div className="h-4 bg-slate-200 dark:bg-dark-surface rounded w-full" />
+                <div key={i} className="bg-white dark:bg-dark-card rounded-2xl border border-apple-gray-200 dark:border-dark-border p-6 animate-pulse">
+                  <div className="h-6 bg-apple-gray-200 dark:bg-dark-surface rounded w-24 mb-4" />
+                  <div className="h-5 bg-apple-gray-200 dark:bg-dark-surface rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-apple-gray-200 dark:bg-dark-surface rounded w-full" />
                 </div>
               ))}
             </div>
@@ -220,16 +220,16 @@ export default function LibraryPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/10 border border-primary-500/20 mb-4">
-            <Users className="w-4 h-4 text-primary-500" />
-            <span className="text-sm font-medium text-primary-600 dark:text-primary-400">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-apple-blue/10 border border-apple-blue/10 mb-4">
+            <Users className="w-4 h-4 text-apple-blue" />
+            <span className="text-sm font-medium text-apple-blue dark:text-apple-blue">
               {teamName || 'Your Team'}
             </span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl font-bold text-apple-black dark:text-white mb-4">
             Team Library
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+          <p className="text-lg text-apple-gray-500 dark:text-slate-300 max-w-2xl mx-auto">
             Your team&apos;s private collection of AI prompts.
           </p>
         </div>
@@ -265,8 +265,8 @@ export default function LibraryPage() {
         {/* Error */}
         {error && (
           <div className="text-center py-12">
-            <AlertCircle className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-            <p className="text-slate-500 dark:text-slate-400">
+            <AlertCircle className="w-10 h-10 text-apple-gray-400 mx-auto mb-3" />
+            <p className="text-apple-gray-400 dark:text-slate-400">
               Unable to load your team prompts. Please try again later.
             </p>
           </div>
@@ -282,8 +282,8 @@ export default function LibraryPage() {
             return (
               <div className="mb-10">
                 <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-4 h-4 text-primary-500" />
-                  <h2 className="text-sm font-semibold text-primary-600 dark:text-primary-400 uppercase tracking-wide">
+                  <Sparkles className="w-4 h-4 text-apple-blue" />
+                  <h2 className="text-sm font-semibold text-apple-blue dark:text-apple-blue uppercase tracking-wide">
                     Suggested for {profile?.role}s
                   </h2>
                 </div>
@@ -301,7 +301,7 @@ export default function LibraryPage() {
                     />
                   ))}
                 </div>
-                <hr className="mt-10 border-slate-200 dark:border-dark-border" />
+                <hr className="mt-10 border-apple-gray-200 dark:border-dark-border" />
               </div>
             )
           })()
@@ -313,7 +313,7 @@ export default function LibraryPage() {
             {/* Time Saved Banner */}
             <TimeSavedBanner copyCounts={copyCounts} />
 
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+            <p className="text-sm text-apple-gray-400 dark:text-slate-400 mb-6">
               Showing {filteredPrompts.length} prompt{filteredPrompts.length !== 1 ? 's' : ''}
             </p>
 
@@ -357,18 +357,18 @@ export default function LibraryPage() {
             {/* Empty state */}
             {filteredPrompts.length === 0 && searchQuery === '' && activeCategory === null && activeFolder === null && (
               <div className="text-center py-16">
-                <div className="w-16 h-16 bg-slate-100 dark:bg-dark-surface rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-slate-400" />
+                <div className="w-16 h-16 bg-apple-gray-50 dark:bg-dark-surface rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-apple-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-apple-black dark:text-white mb-2">
                   No team prompts yet
                 </h3>
-                <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-md mx-auto">
+                <p className="text-apple-gray-400 dark:text-slate-400 mb-6 max-w-md mx-auto">
                   Start building your team&apos;s prompt library by contributing your first prompt.
                 </p>
                 <Link
                   href="/contribute"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-apple-blue hover:bg-apple-blue-hover text-white font-medium rounded-full transition-colors"
                 >
                   <Plus className="w-5 h-5" />
                   Add Your First Prompt
@@ -378,7 +378,7 @@ export default function LibraryPage() {
 
             {filteredPrompts.length === 0 && (searchQuery !== '' || activeCategory !== null || activeFolder !== null) && (
               <div className="text-center py-12">
-                <p className="text-slate-500 dark:text-slate-400">
+                <p className="text-apple-gray-400 dark:text-slate-400">
                   No prompts found matching your criteria.
                 </p>
               </div>

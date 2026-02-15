@@ -31,8 +31,8 @@ export function FolderSidebar({ folders, activeFolder, onSelect, onCreate, onDel
         onClick={() => onSelect(null)}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
           activeFolder === null
-            ? 'bg-primary-500 text-white'
-            : 'bg-slate-100 dark:bg-dark-hover text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-dark-surface'
+            ? 'bg-apple-blue text-white'
+            : 'bg-apple-gray-50 dark:bg-dark-hover text-apple-gray-500 dark:text-slate-400 hover:bg-apple-gray-200 dark:hover:bg-dark-surface'
         }`}
       >
         All
@@ -43,8 +43,8 @@ export function FolderSidebar({ folders, activeFolder, onSelect, onCreate, onDel
         onClick={() => onSelect('unsorted')}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
           activeFolder === 'unsorted'
-            ? 'bg-primary-500 text-white'
-            : 'bg-slate-100 dark:bg-dark-hover text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-dark-surface'
+            ? 'bg-apple-blue text-white'
+            : 'bg-apple-gray-50 dark:bg-dark-hover text-apple-gray-500 dark:text-slate-400 hover:bg-apple-gray-200 dark:hover:bg-dark-surface'
         }`}
       >
         Unsorted
@@ -57,8 +57,8 @@ export function FolderSidebar({ folders, activeFolder, onSelect, onCreate, onDel
             onClick={() => onSelect(folder.id)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
               activeFolder === folder.id
-                ? 'bg-primary-500 text-white'
-                : 'bg-slate-100 dark:bg-dark-hover text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-dark-surface'
+                ? 'bg-apple-blue text-white'
+                : 'bg-apple-gray-50 dark:bg-dark-hover text-apple-gray-500 dark:text-slate-400 hover:bg-apple-gray-200 dark:hover:bg-dark-surface'
             }`}
           >
             <FolderOpen className="w-3 h-3" style={{ color: activeFolder === folder.id ? 'white' : folder.color }} />
@@ -82,20 +82,20 @@ export function FolderSidebar({ folders, activeFolder, onSelect, onCreate, onDel
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             placeholder="Folder name"
-            className="px-2 py-1 text-xs rounded-lg border border-slate-300 dark:border-dark-border bg-white dark:bg-dark-surface text-slate-900 dark:text-white w-28 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="px-2 py-1 text-xs rounded-lg border border-apple-gray-200 dark:border-dark-border bg-white dark:bg-dark-surface text-apple-black dark:text-white w-28 focus:outline-none focus:ring-1 focus:ring-apple-blue"
             autoFocus
           />
-          <button onClick={handleCreate} className="p-1 text-primary-500 hover:text-primary-600">
+          <button onClick={handleCreate} className="p-1 text-apple-blue hover:text-apple-blue-hover">
             <Plus className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => { setCreating(false); setNewName('') }} className="p-1 text-slate-400 hover:text-slate-600">
+          <button onClick={() => { setCreating(false); setNewName('') }} className="p-1 text-apple-gray-400 hover:text-apple-gray-500">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
       ) : (
         <button
           onClick={() => setCreating(true)}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap text-apple-blue hover:bg-apple-blue/5 dark:hover:bg-apple-blue/10 transition-colors"
         >
           <Plus className="w-3 h-3" />
           New Folder

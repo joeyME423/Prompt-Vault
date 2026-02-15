@@ -46,20 +46,20 @@ export default function DashboardPage() {
       <div className="min-h-screen pt-24 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="animate-pulse">
-            <div className="h-10 bg-slate-200 dark:bg-dark-surface rounded w-48 mb-2" />
-            <div className="h-5 bg-slate-200 dark:bg-dark-surface rounded w-72 mb-8" />
+            <div className="h-10 bg-apple-gray-200 dark:bg-dark-surface rounded w-48 mb-2" />
+            <div className="h-5 bg-apple-gray-200 dark:bg-dark-surface rounded w-72 mb-8" />
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="card p-6 animate-pulse">
-                  <div className="h-10 w-10 bg-slate-200 dark:bg-dark-surface rounded-xl mb-3" />
-                  <div className="h-7 bg-slate-200 dark:bg-dark-surface rounded w-16 mb-1" />
-                  <div className="h-4 bg-slate-200 dark:bg-dark-surface rounded w-24" />
+                <div key={i} className="bg-white dark:bg-dark-card rounded-2xl border border-apple-gray-200 dark:border-dark-border p-6 animate-pulse">
+                  <div className="h-10 w-10 bg-apple-gray-200 dark:bg-dark-surface rounded-xl mb-3" />
+                  <div className="h-7 bg-apple-gray-200 dark:bg-dark-surface rounded w-16 mb-1" />
+                  <div className="h-4 bg-apple-gray-200 dark:bg-dark-surface rounded w-24" />
                 </div>
               ))}
             </div>
             <div className="grid lg:grid-cols-2 gap-6">
-              <div className="card p-6 h-80 animate-pulse" />
-              <div className="card p-6 h-80 animate-pulse" />
+              <div className="bg-white dark:bg-dark-card rounded-2xl border border-apple-gray-200 dark:border-dark-border p-6 h-80 animate-pulse" />
+              <div className="bg-white dark:bg-dark-card rounded-2xl border border-apple-gray-200 dark:border-dark-border p-6 h-80 animate-pulse" />
             </div>
           </div>
         </div>
@@ -72,16 +72,16 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/10 border border-primary-500/20 mb-4">
-            <BarChart3 className="w-4 h-4 text-primary-500" />
-            <span className="text-sm font-medium text-primary-600 dark:text-primary-400">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-apple-blue/10 border border-apple-blue/20 mb-4">
+            <BarChart3 className="w-4 h-4 text-apple-blue" />
+            <span className="text-sm font-medium text-apple-blue-hover dark:text-apple-blue">
               Analytics
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-apple-black dark:text-white mb-2">
             Dashboard
           </h1>
-          <p className="text-slate-600 dark:text-slate-300">
+          <p className="text-apple-gray-500 dark:text-slate-300">
             Track your team&apos;s prompt usage, success rates, and productivity gains.
           </p>
         </div>

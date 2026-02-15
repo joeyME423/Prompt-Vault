@@ -37,12 +37,12 @@ export function NewPrompts() {
 
   if (loading) {
     return (
-      <section className="py-20 bg-slate-50 dark:bg-dark-card">
+      <section className="py-28 bg-apple-gray-50 dark:bg-dark-surface">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="animate-pulse">
-              <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-64 mx-auto mb-4"></div>
-              <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-96 mx-auto"></div>
+              <div className="h-8 bg-apple-gray-200 dark:bg-dark-hover rounded w-64 mx-auto mb-4"></div>
+              <div className="h-4 bg-apple-gray-200 dark:bg-dark-hover rounded w-96 mx-auto"></div>
             </div>
           </div>
         </div>
@@ -52,10 +52,10 @@ export function NewPrompts() {
 
   if (error) {
     return (
-      <section className="py-20 bg-slate-50 dark:bg-dark-card">
+      <section className="py-28 bg-apple-gray-50 dark:bg-dark-surface">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <AlertCircle className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-          <p className="text-slate-500 dark:text-slate-400">
+          <AlertCircle className="w-10 h-10 text-apple-gray-400 mx-auto mb-3" />
+          <p className="text-apple-gray-500 dark:text-apple-gray-400">
             Unable to load prompts right now. Please try again later.
           </p>
         </div>
@@ -68,21 +68,21 @@ export function NewPrompts() {
   }
 
   return (
-    <section className="py-20 bg-slate-50 dark:bg-dark-card">
+    <section className="py-28 bg-apple-gray-50 dark:bg-dark-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-12">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            <h2 className="text-3xl font-semibold text-apple-black dark:text-white mb-2">
               Community Prompts
             </h2>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-apple-gray-500 dark:text-apple-gray-400">
               Free and open to everyone &mdash; our way of giving back to the PM community
             </p>
           </div>
           <Link
             href="/community"
-            className="inline-flex items-center gap-2 text-primary-500 hover:text-primary-600 font-medium transition-colors"
+            className="inline-flex items-center gap-2 text-apple-blue hover:text-apple-blue-hover font-medium transition-colors text-sm"
           >
             View all community prompts
             <ArrowRight className="w-4 h-4" />

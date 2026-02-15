@@ -46,7 +46,7 @@ export function FolderDropdown({ folders, currentFolderId, onMove, onCreate }: F
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-hover transition-colors"
+        className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-apple-gray-400 dark:text-slate-400 hover:bg-apple-gray-50 dark:hover:bg-dark-hover transition-colors"
         title="Move to folder"
       >
         <FolderOpen className="w-3.5 h-3.5" style={currentFolder ? { color: currentFolder.color } : undefined} />
@@ -55,12 +55,12 @@ export function FolderDropdown({ folders, currentFolderId, onMove, onCreate }: F
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl shadow-lg z-50 py-1">
+        <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-dark-card rounded-2xl border border-apple-gray-200 dark:border-dark-border shadow-lg z-50 py-1">
           {/* Unsorted option */}
           <button
             onClick={() => { onMove(null); setOpen(false) }}
-            className={`w-full text-left px-3 py-2 text-xs hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors ${
-              !currentFolderId ? 'text-primary-500 font-medium' : 'text-slate-600 dark:text-slate-400'
+            className={`w-full text-left px-3 py-2 text-xs hover:bg-apple-gray-50 dark:hover:bg-dark-hover transition-colors ${
+              !currentFolderId ? 'text-apple-blue font-medium' : 'text-apple-gray-500 dark:text-slate-400'
             }`}
           >
             Unsorted
@@ -70,8 +70,8 @@ export function FolderDropdown({ folders, currentFolderId, onMove, onCreate }: F
             <button
               key={folder.id}
               onClick={() => { onMove(folder.id); setOpen(false) }}
-              className={`w-full text-left px-3 py-2 text-xs hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors flex items-center gap-2 ${
-                currentFolderId === folder.id ? 'text-primary-500 font-medium' : 'text-slate-600 dark:text-slate-400'
+              className={`w-full text-left px-3 py-2 text-xs hover:bg-apple-gray-50 dark:hover:bg-dark-hover transition-colors flex items-center gap-2 ${
+                currentFolderId === folder.id ? 'text-apple-blue font-medium' : 'text-apple-gray-500 dark:text-slate-400'
               }`}
             >
               <FolderOpen className="w-3 h-3 flex-shrink-0" style={{ color: folder.color }} />
@@ -79,7 +79,7 @@ export function FolderDropdown({ folders, currentFolderId, onMove, onCreate }: F
             </button>
           ))}
 
-          <div className="border-t border-slate-200 dark:border-dark-border mt-1 pt-1">
+          <div className="border-t border-apple-gray-200 dark:border-dark-border mt-1 pt-1">
             {creating ? (
               <div className="px-3 py-2 flex items-center gap-1">
                 <input
@@ -88,14 +88,14 @@ export function FolderDropdown({ folders, currentFolderId, onMove, onCreate }: F
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                   placeholder="Folder name"
-                  className="flex-1 px-2 py-1 text-xs rounded border border-slate-300 dark:border-dark-border bg-white dark:bg-dark-surface text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  className="flex-1 px-2 py-1 text-xs rounded border border-apple-gray-200 dark:border-dark-border bg-white dark:bg-dark-surface text-apple-black dark:text-white focus:outline-none focus:ring-1 focus:ring-apple-blue"
                   autoFocus
                 />
               </div>
             ) : (
               <button
                 onClick={() => setCreating(true)}
-                className="w-full text-left px-3 py-2 text-xs text-primary-500 hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-xs text-apple-blue hover:bg-apple-gray-50 dark:hover:bg-dark-hover transition-colors flex items-center gap-2"
               >
                 <Plus className="w-3 h-3" />
                 New Folder

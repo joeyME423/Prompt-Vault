@@ -34,7 +34,7 @@ const iconMap = {
 }
 
 const colorMap = {
-  save: 'bg-primary-500/10 text-primary-500',
+  save: 'bg-apple-blue/10 text-apple-blue',
   rating: 'bg-amber-500/10 text-amber-500',
   feedback: 'bg-green-500/10 text-green-500',
 }
@@ -42,16 +42,16 @@ const colorMap = {
 export function RecentActivity({ activity }: RecentActivityProps) {
   if (activity.length === 0) {
     return (
-      <div className="card p-6">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Recent Activity</h3>
-        <p className="text-slate-400 text-sm text-center py-8">No recent activity</p>
+      <div className="bg-white dark:bg-dark-card rounded-2xl border border-apple-gray-200 dark:border-dark-border p-6">
+        <h3 className="text-sm font-semibold text-apple-black dark:text-white mb-4">Recent Activity</h3>
+        <p className="text-apple-gray-400 text-sm text-center py-8">No recent activity</p>
       </div>
     )
   }
 
   return (
-    <div className="card p-6">
-      <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Recent Activity</h3>
+    <div className="bg-white dark:bg-dark-card rounded-2xl border border-apple-gray-200 dark:border-dark-border p-6">
+      <h3 className="text-sm font-semibold text-apple-black dark:text-white mb-4">Recent Activity</h3>
       <div className="space-y-3">
         {activity.map((item) => {
           const Icon = iconMap[item.type]
@@ -62,15 +62,15 @@ export function RecentActivity({ activity }: RecentActivityProps) {
                 <Icon className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-slate-700 dark:text-slate-300">
-                  <span className="font-medium text-slate-900 dark:text-white">{item.userName}</span>
+                <p className="text-sm text-apple-gray-500 dark:text-slate-300">
+                  <span className="font-medium text-apple-black dark:text-white">{item.userName}</span>
                   {' '}{item.detail}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                <p className="text-xs text-apple-gray-400 dark:text-slate-400 truncate">
                   {item.promptTitle}
                 </p>
               </div>
-              <span className="text-xs text-slate-400 dark:text-slate-500 flex-shrink-0">
+              <span className="text-xs text-apple-gray-400 dark:text-slate-500 flex-shrink-0">
                 {timeAgo(item.created_at)}
               </span>
             </div>

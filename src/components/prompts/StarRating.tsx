@@ -79,13 +79,13 @@ export function StarRating({ promptId, userId, averageRating, totalRatings, user
                   ? 'text-amber-400 fill-amber-400'
                   : star <= Math.round(currentAverage)
                     ? 'text-amber-400/40 fill-amber-400/40'
-                    : 'text-slate-300 dark:text-slate-600'
+                    : 'text-apple-gray-400 dark:text-apple-gray-500'
               }`}
             />
           </button>
         ))}
       </div>
-      <span className="text-xs text-slate-500 dark:text-slate-400">
+      <span className="text-xs text-apple-gray-400 dark:text-slate-400">
         {currentAverage > 0 ? currentAverage.toFixed(1) : 'No ratings'}{' '}
         {currentTotal > 0 && `(${currentTotal})`}
       </span>

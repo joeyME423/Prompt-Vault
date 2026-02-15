@@ -25,25 +25,25 @@ export function TimeSavedBanner({ copyCounts }: TimeSavedBannerProps) {
     : `${minutes}m`
 
   return (
-    <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-primary-500/5 via-accent-cyan/5 to-accent-purple/5 border border-primary-500/10">
+    <div className="mb-8 p-4 rounded-xl bg-apple-blue/5 border border-apple-blue/10">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary-500/10 flex items-center justify-center flex-shrink-0">
-            <Clock className="w-5 h-5 text-primary-500" />
+          <div className="w-10 h-10 rounded-full bg-apple-blue/10 flex items-center justify-center flex-shrink-0">
+            <Clock className="w-5 h-5 text-apple-blue" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-900 dark:text-white">
+            <p className="text-sm font-semibold text-apple-black dark:text-white">
               ~{timeDisplay} saved
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-apple-gray-400 dark:text-slate-400">
               Estimated time saved using PromptVault
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/50 dark:bg-dark-surface/50">
-            <TrendingUp className="w-3.5 h-3.5 text-primary-500" />
-            <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+            <TrendingUp className="w-3.5 h-3.5 text-apple-blue" />
+            <span className="text-xs font-medium text-apple-gray-500 dark:text-slate-300">
               {totalCopies} prompt{totalCopies !== 1 ? 's' : ''} used
             </span>
           </div>
