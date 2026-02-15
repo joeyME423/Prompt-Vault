@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Moon, Sun, Menu, X, Sparkles, Plus, ChevronDown, Brain, LogOut, User } from 'lucide-react'
+import { Moon, Sun, Menu, X, Sparkles, Plus, ChevronDown, Brain, LogOut, User, BarChart3 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTheme } from './ThemeProvider'
@@ -59,6 +59,11 @@ export function Navbar() {
             <Link href="/library" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
               Library
             </Link>
+            {authChecked && isLoggedIn && (
+              <Link href="/dashboard" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
+                Dashboard
+              </Link>
+            )}
             <Link href="/community" className="text-slate-600 dark:text-slate-300 hover:text-primary-500 transition-colors">
               Community
             </Link>
@@ -194,6 +199,12 @@ export function Navbar() {
             <Link href="/library" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
               Library
             </Link>
+            {authChecked && isLoggedIn && (
+              <Link href="/dashboard" className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-primary-500">
+                <BarChart3 className="w-4 h-4" />
+                Dashboard
+              </Link>
+            )}
             <Link href="/community" className="block text-slate-600 dark:text-slate-300 hover:text-primary-500">
               Community
             </Link>
