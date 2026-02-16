@@ -467,10 +467,10 @@ function FormLoading() {
 
 export default function ContributePage() {
   return (
-    <main className="min-h-screen pt-24 pb-8 px-4">
+    <div className="p-6 lg:p-8">
       <Suspense fallback={<FormLoading />}>
         <ContributeForm />
       </Suspense>
-    </main>
+    </div>
   )
 }

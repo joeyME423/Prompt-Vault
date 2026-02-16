@@ -185,7 +185,7 @@ export function HeroPromptBuilder({ formData, setFormData }: HeroPromptBuilderPr
         </button>
 
         <Link
-          href="/contribute"
+          href="/app/contribute"
           className="text-xs text-apple-gray-400 hover:text-apple-blue transition-colors flex items-center gap-1 whitespace-nowrap"
         >
           Full form <ArrowRight className="w-3 h-3" />

@@ -1,9 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { BarChart3, Clock, TrendingUp, Users } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { useDashboardData } from '@/hooks/useDashboardData'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { CATEGORY_TIME_SAVED } from '@/lib/constants'
@@ -14,8 +11,6 @@ import { TopPromptsTable } from '@/components/dashboard/TopPromptsTable'
 import { RecentActivity } from '@/components/dashboard/RecentActivity'
 
 export default function DashboardPage() {
-  const router = useRouter()
-  const [authed, setAuthed] = useState(false)
   const { stats, categoryStats, topPrompts, recentActivity, loading } = useDashboardData()
   const [copyCounts] = useLocalStorage<Record<string, number>>('pv-copy-counts', {})
 
@@ -28,23 +23,10 @@ export default function DashboardPage() {
   const minutes = totalMinutes % 60
   const timeDisplay = hours > 0 ? `~${hours}h ${minutes}m` : `~${minutes}m`
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        router.push('/auth/login?redirect=/dashboard')
-        return
-      }
-      setAuthed(true)
-    }
-    checkAuth()
-  }, [router])
-
-  if (!authed || loading) {
+  if (loading) {
     return (
-      <div className="min-h-screen pt-24 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
           <div className="animate-pulse">
             <div className="h-10 bg-apple-gray-200 dark:bg-dark-surface rounded w-48 mb-2" />
             <div className="h-5 bg-apple-gray-200 dark:bg-dark-surface rounded w-72 mb-8" />
@@ -68,8 +50,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-apple-blue/10 border border-apple-blue/20 mb-4">

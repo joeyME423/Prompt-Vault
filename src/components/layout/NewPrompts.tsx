@@ -81,7 +81,7 @@ export function NewPrompts() {
             </p>
           </div>
           <Link
-            href="/community"
+            href="/app/community"
             className="inline-flex items-center gap-2 text-apple-blue hover:text-apple-blue-hover font-medium transition-colors text-sm"
           >
             View all community prompts

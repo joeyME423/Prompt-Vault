@@ -168,8 +168,8 @@ export default function CommunityPage() {
   })
 
   return (
-    <div className="min-h-screen pt-24 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-apple-gray-50 border border-apple-gray-200 mb-4">
@@ -188,7 +188,7 @@ export default function CommunityPage() {
             <Heart className="w-4 h-4 text-apple-blue" />
             <p className="text-sm text-apple-gray-500 dark:text-slate-400">
               Free and open to everyone. We believe great prompts should be accessible to all PMs &mdash; and we&apos;ll keep it that way for as long as we can.{' '}
-              <Link href="/contribute" className="text-apple-blue hover:text-apple-blue-hover font-medium">
+              <Link href="/app/contribute" className="text-apple-blue hover:text-apple-blue-hover font-medium">
                 Contribute yours
               </Link>
             </p>

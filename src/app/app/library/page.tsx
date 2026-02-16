@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { FilterTabs } from '@/components/ui/FilterTabs'
 import { PromptCard } from '@/components/prompts/PromptCard'
@@ -30,7 +29,6 @@ interface SavedPromptMapping {
 }
 
 export default function LibraryPage() {
-  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [prompts, setPrompts] = useState<Prompt[]>([])
@@ -64,10 +62,10 @@ export default function LibraryPage() {
     async function fetchTeamPrompts() {
       const supabase = createClient()
 
-      // Check auth — library requires login
+      // Get user session
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        router.push('/auth/login?redirect=/library')
+        setLoading(false)
         return
       }
 
@@ -116,7 +114,7 @@ export default function LibraryPage() {
     }
 
     fetchTeamPrompts()
-  }, [router, fetchSavedMappings])
+  }, [fetchSavedMappings])
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -195,8 +193,8 @@ export default function LibraryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
           <div className="animate-pulse">
             <div className="h-10 bg-apple-gray-200 dark:bg-dark-surface rounded w-64 mx-auto mb-4" />
             <div className="h-5 bg-apple-gray-200 dark:bg-dark-surface rounded w-96 mx-auto mb-12" />
@@ -216,8 +214,8 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-apple-blue/10 border border-apple-blue/10 mb-4">
@@ -367,7 +365,7 @@ export default function LibraryPage() {
                   Start building your team&apos;s prompt library by contributing your first prompt.
                 </p>
                 <Link
-                  href="/contribute"
+                  href="/app/contribute"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-apple-blue hover:bg-apple-blue-hover text-white font-medium rounded-full transition-colors"
                 >
                   <Plus className="w-5 h-5" />

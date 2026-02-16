@@ -3,7 +3,6 @@ import { Inter } from 'next/font/google'
 import { Suspense } from 'react'
 import './globals.css'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
-import { Navbar } from '@/components/layout/Navbar'
 import { PostHogProvider } from '@/components/providers/PostHogProvider'
 import { RolePickerModal } from '@/components/ui/RolePickerModal'
 
@@ -25,9 +24,8 @@ export default function RootLayout({
         <ThemeProvider>
           <Suspense fallback={null}>
             <PostHogProvider>
-              <Navbar />
               <RolePickerModal />
-              <main>{children}</main>
+              {children}
             </PostHogProvider>
           </Suspense>
         </ThemeProvider>

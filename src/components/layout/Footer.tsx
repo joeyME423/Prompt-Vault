@@ -25,7 +25,7 @@ export function Footer() {
             <h4 className="font-medium text-apple-black dark:text-white text-xs uppercase tracking-wider mb-4">Product</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/library" className="text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-blue text-sm transition-colors">
+                <Link href="/app/library" className="text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-blue text-sm transition-colors">
                   Prompt Library
                 </Link>
               </li>
@@ -35,7 +35,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/#pricing" className="text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-blue text-sm transition-colors">
+                <Link href="/pricing" className="text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-blue text-sm transition-colors">
                   Pricing
                 </Link>
               </li>
@@ -47,7 +47,7 @@ export function Footer() {
             <h4 className="font-medium text-apple-black dark:text-white text-xs uppercase tracking-wider mb-4">Resources</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/contribute" className="text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-blue text-sm transition-colors">
+                <Link href="/app/contribute" className="text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-blue text-sm transition-colors">
                   Contribute
                 </Link>
               </li>

@@ -53,13 +53,13 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <Link href="/library" className="text-xs text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-black dark:hover:text-white transition-colors">
-              Library
+            <Link href="/pricing" className="text-xs text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-black dark:hover:text-white transition-colors">
+              Pricing
             </Link>
-            <Link href="/dashboard" className="text-xs text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-black dark:hover:text-white transition-colors">
-              Dashboard
+            <Link href="/about" className="text-xs text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-black dark:hover:text-white transition-colors">
+              About
             </Link>
-            <Link href="/community" className="text-xs text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-black dark:hover:text-white transition-colors">
+            <Link href="/app/community" className="text-xs text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-black dark:hover:text-white transition-colors">
               Community
             </Link>
 
@@ -124,15 +124,12 @@ export function Navbar() {
             <Link href="/#features" className="text-xs text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-black dark:hover:text-white transition-colors">
               Features
             </Link>
-            <Link href="/#pricing" className="text-xs text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-black dark:hover:text-white transition-colors">
-              Pricing
-            </Link>
           </div>
 
           {/* Actions */}
           <div className="hidden md:flex items-center gap-3">
             <Link
-              href="/contribute"
+              href="/app/contribute"
               className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-apple-blue hover:bg-apple-blue-hover text-white text-xs font-medium rounded-full transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -148,7 +145,7 @@ export function Navbar() {
             {authChecked && isLoggedIn ? (
               <>
                 <Link
-                  href="/library"
+                  href="/app/library"
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-apple-gray-500 hover:text-apple-black dark:hover:text-white hover:bg-apple-gray-50 dark:hover:bg-dark-hover transition-colors"
                 >
                   <User className="w-3.5 h-3.5" />
@@ -188,14 +185,13 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden bg-white dark:bg-black border-t border-apple-gray-200 dark:border-dark-border">
           <div className="px-4 py-4 space-y-3">
-            <Link href="/library" className="block text-sm text-apple-gray-500 hover:text-apple-black dark:hover:text-white">
-              Library
+            <Link href="/pricing" className="block text-sm text-apple-gray-500 hover:text-apple-black dark:hover:text-white">
+              Pricing
             </Link>
-            <Link href="/dashboard" className="flex items-center gap-2 text-sm text-apple-gray-500 hover:text-apple-black dark:hover:text-white">
-              <BarChart3 className="w-4 h-4" />
-              Dashboard
+            <Link href="/about" className="block text-sm text-apple-gray-500 hover:text-apple-black dark:hover:text-white">
+              About
             </Link>
-            <Link href="/community" className="block text-sm text-apple-gray-500 hover:text-apple-black dark:hover:text-white">
+            <Link href="/app/community" className="block text-sm text-apple-gray-500 hover:text-apple-black dark:hover:text-white">
               Community
             </Link>
 
@@ -234,11 +230,8 @@ export function Navbar() {
             <Link href="/#features" className="block text-sm text-apple-gray-500 hover:text-apple-black dark:hover:text-white">
               Features
             </Link>
-            <Link href="/#pricing" className="block text-sm text-apple-gray-500 hover:text-apple-black dark:hover:text-white">
-              Pricing
-            </Link>
             <Link
-              href="/contribute"
+              href="/app/contribute"
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-apple-blue hover:bg-apple-blue-hover text-white text-sm font-medium rounded-full transition-colors"
             >
               <Plus className="w-4 h-4" />
