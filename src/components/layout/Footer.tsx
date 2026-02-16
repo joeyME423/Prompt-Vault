@@ -36,7 +36,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/pricing" className="text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-blue text-sm transition-colors">
-                  Pricing
+                  Prompt Guide
                 </Link>
               </li>
             </ul>

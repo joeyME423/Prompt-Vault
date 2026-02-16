@@ -54,7 +54,7 @@ export function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             <Link href="/pricing" className="text-xs text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-black dark:hover:text-white transition-colors">
-              Pricing
+              Prompt Guide
             </Link>
             <Link href="/about" className="text-xs text-apple-gray-500 dark:text-apple-gray-400 hover:text-apple-black dark:hover:text-white transition-colors">
               About
@@ -186,7 +186,7 @@ export function Navbar() {
         <div className="md:hidden bg-white dark:bg-black border-t border-apple-gray-200 dark:border-dark-border">
           <div className="px-4 py-4 space-y-3">
             <Link href="/pricing" className="block text-sm text-apple-gray-500 hover:text-apple-black dark:hover:text-white">
-              Pricing
+              Prompt Guide
             </Link>
             <Link href="/about" className="block text-sm text-apple-gray-500 hover:text-apple-black dark:hover:text-white">
               About

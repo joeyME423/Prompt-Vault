@@ -3,7 +3,7 @@ export { Navbar } from './layout/Navbar'
 export { ThemeProvider, useTheme } from './layout/ThemeProvider'
 export { Hero } from './layout/Hero'
 export { Features } from './layout/Features'
-export { Pricing } from './layout/Pricing'
+export { PromptGuide } from './layout/Pricing'
 export { Footer } from './layout/Footer'
 export { NewPrompts } from './layout/NewPrompts'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Copy, Bookmark, BookmarkCheck, Lock, TrendingUp } from 'lucide-react'
+import { Copy, Bookmark, BookmarkCheck, TrendingUp } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -23,8 +23,6 @@ interface PromptCardProps {
   onSaveChange?: (promptId: string, saved: boolean, savedPromptId?: string) => void
 }
 
-const FREE_SAVE_LIMIT = 10
-
 const categoryColors: Record<string, string> = {
   planning: 'bg-apple-gray-50 dark:bg-dark-hover text-apple-gray-500 dark:text-apple-gray-400',
   communication: 'bg-apple-gray-50 dark:bg-dark-hover text-apple-gray-500 dark:text-apple-gray-400',
@@ -39,8 +37,6 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
   const [userId, setUserId] = useState<string | null>(externalUserId ?? null)
-  const [saveCount, setSaveCount] = useState(0)
-  const [showLimitMessage, setShowLimitMessage] = useState(false)
   const [ratingData, setRatingData] = useState({ average: 0, total: 0, userRating: null as number | null })
   const [showFeedback, setShowFeedback] = useState(false)
   const [successRate, setSuccessRate] = useState<{ rate: number; total: number } | null>(null)
@@ -68,14 +64,6 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
         .maybeSingle()
 
       if (savedData) setSaved(true)
-
-      // Get total save count for this user
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { count } = await (supabase.from('saved_prompts') as any)
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', currentUserId)
-
-      setSaveCount(count || 0)
 
       // Fetch feedback/success rate data
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -149,12 +137,6 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
     if (!userId) return
     if (saving) return
 
-    if (!saved && saveCount >= FREE_SAVE_LIMIT) {
-      setShowLimitMessage(true)
-      setTimeout(() => setShowLimitMessage(false), 4000)
-      return
-    }
-
     setSaving(true)
     const supabase = createClient()
 
@@ -166,7 +148,6 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
           .eq('user_id', userId)
           .eq('prompt_id', prompt.id)
         setSaved(false)
-        setSaveCount((c) => c - 1)
         onSaveChange?.(prompt.id, false)
       } else {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -175,7 +156,6 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
           .select('id')
           .single()
         setSaved(true)
-        setSaveCount((c) => c + 1)
         posthog.capture('prompt_saved', { prompt_id: prompt.id, category: prompt.category })
         onSaveChange?.(prompt.id, true, newSaved?.id)
       }
@@ -218,17 +198,6 @@ export function PromptCard({ prompt, showRating = false, userId: externalUserId,
           </Link>
         )}
       </div>
-
-      {/* Save limit message */}
-      {showLimitMessage && (
-        <div className="mb-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center gap-2">
-          <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-          <p className="text-xs text-amber-700 dark:text-amber-300">
-            You&apos;ve reached the free limit of {FREE_SAVE_LIMIT} saved prompts.{' '}
-            <Link href="/#pricing" className="underline font-medium">Upgrade</Link> to save more.
-          </p>
-        </div>
-      )}
 
       {/* Content */}
       <h3 className="text-lg font-semibold text-apple-black dark:text-white mb-2">

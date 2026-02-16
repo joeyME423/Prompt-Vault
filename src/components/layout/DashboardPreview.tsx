@@ -140,7 +140,7 @@ export function DashboardPreview() {
             <ArrowRight className="w-4 h-4" />
           </Link>
           <p className="mt-3 text-sm text-apple-gray-400">
-            Free to start. See your analytics instantly.
+            Free for everyone. See your analytics instantly.
           </p>
         </div>
       </div>

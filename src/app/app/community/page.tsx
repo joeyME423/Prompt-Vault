@@ -11,7 +11,7 @@ import { PromptKanbanView } from '@/components/prompts/PromptKanbanView'
 import { TimeSavedBanner } from '@/components/ui/TimeSavedBanner'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { useFolders } from '@/hooks/useFolders'
-import { AlertCircle, Globe, Heart, Lock, ArrowRight, Sparkles } from 'lucide-react'
+import { AlertCircle, Globe, Heart, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useUserProfile } from '@/hooks/useUserProfile'
@@ -34,14 +34,13 @@ export default function CommunityPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
-  const [isPaidUser, setIsPaidUser] = useState(false)
   const [view, setView] = useLocalStorage<LibraryView>('pv-community-view', 'grid')
   const [sortColumn, setSortColumn] = useState<SortColumn>('created_at')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [copyCounts, setCopyCounts] = useLocalStorage<Record<string, number>>('pv-copy-counts', {})
   const [savedMappings, setSavedMappings] = useState<SavedPromptMapping[]>([])
   const { profile } = useUserProfile()
-  const { folders, createFolder, moveToFolder } = useFolders(isPaidUser ? userId : null)
+  const { folders, createFolder, moveToFolder } = useFolders(userId)
 
   // Get suggested categories based on user role
   const suggestedCategories = profile?.role ? ROLE_CATEGORY_MAP[profile.role] || [] : []
@@ -73,24 +72,12 @@ export default function CommunityPage() {
       if (session) {
         setUserId(session.user.id)
 
-        // Check if paid user (has team membership)
+        // Fetch saved prompt mappings for folder assignment
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: membership } = await (supabase.from('team_members') as any)
-          .select('team_id')
+        const { data: mappings } = await (supabase.from('saved_prompts') as any)
+          .select('id, prompt_id, folder_id')
           .eq('user_id', session.user.id)
-          .limit(1)
-          .maybeSingle()
-
-        if (membership) {
-          setIsPaidUser(true)
-
-          // Fetch saved prompt mappings for folder assignment
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data: mappings } = await (supabase.from('saved_prompts') as any)
-            .select('id, prompt_id, folder_id')
-            .eq('user_id', session.user.id)
-          setSavedMappings(mappings || [])
-        }
+        setSavedMappings(mappings || [])
       }
 
       // Fetch community prompts (public, no team)
@@ -287,14 +274,12 @@ export default function CommunityPage() {
                     showRating
                     userId={userId}
                     onCopy={handleCopy}
-                    {...(isPaidUser ? {
-                      folders,
-                      currentFolderId: getFolderId(prompt.id),
-                      savedPromptId: getSavedPromptId(prompt.id),
-                      onMoveToFolder: handleMoveToFolder,
-                      onCreateFolder: createFolder,
-                      onSaveChange: handleSaveChange,
-                    } : {})}
+                    folders={folders}
+                    currentFolderId={getFolderId(prompt.id)}
+                    savedPromptId={getSavedPromptId(prompt.id)}
+                    onMoveToFolder={handleMoveToFolder}
+                    onCreateFolder={createFolder}
+                    onSaveChange={handleSaveChange}
                   />
                 ))}
               </div>
@@ -316,32 +301,6 @@ export default function CommunityPage() {
 
             {view === 'kanban' && (
               <PromptKanbanView prompts={sortedPrompts} userId={userId} categories={categories} />
-            )}
-
-            {/* Pro upsell */}
-            {!userId && filteredPrompts.length > 0 && (
-              <div className="mt-12 p-6 rounded-2xl bg-apple-gray-50 dark:bg-dark-surface border border-apple-gray-200 dark:border-dark-border">
-                <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-apple-blue/10 flex items-center justify-center">
-                    <Lock className="w-6 h-6 text-apple-blue" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-apple-black dark:text-white mb-1">
-                      Want to keep prompts private to your team?
-                    </h3>
-                    <p className="text-sm text-apple-gray-500 dark:text-slate-400">
-                      Sign up for Pro to create a private team library, organize prompts in folders, and collaborate with your team &mdash; all in one place.
-                    </p>
-                  </div>
-                  <Link
-                    href="/#pricing"
-                    className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-apple-blue hover:bg-apple-blue-hover text-white font-medium rounded-full transition-colors"
-                  >
-                    View Pro
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
             )}
 
             {filteredPrompts.length === 0 && (

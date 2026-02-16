@@ -1,23 +1,15 @@
-import { Pricing } from '@/components/layout/Pricing'
+import { PromptGuide } from '@/components/layout/Pricing'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Pricing | PromptVault',
-  description: 'Simple, transparent pricing for PromptVault. Start free, upgrade when your team is ready.',
+  title: 'Prompt Guide | PromptVault',
+  description: 'Learn how to write great AI prompts for project management. Best practices, examples, and a step-by-step guide.',
 }
 
-export default function PricingPage() {
+export default function PromptGuidePage() {
   return (
-    <div className="pt-20">
-      <div className="py-16 text-center">
-        <h1 className="text-4xl sm:text-5xl font-semibold text-apple-black dark:text-white mb-4">
-          Pricing
-        </h1>
-        <p className="text-lg text-apple-gray-500 dark:text-apple-gray-400 max-w-2xl mx-auto">
-          Start free. Upgrade when your team is ready to scale with AI.
-        </p>
-      </div>
-      <Pricing />
+    <div className="pt-12">
+      <PromptGuide />
     </div>
   )
 }

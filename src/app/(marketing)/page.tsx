@@ -2,8 +2,7 @@ import { Hero } from '@/components/layout/Hero'
 import { Features } from '@/components/layout/Features'
 import { NewPrompts } from '@/components/layout/NewPrompts'
 import { DashboardPreview } from '@/components/layout/DashboardPreview'
-import { Pricing } from '@/components/layout/Pricing'
-import { Footer } from '@/components/layout/Footer'
+import { PromptGuide } from '@/components/layout/Pricing'
 
 export default function Home() {
   return (
@@ -12,8 +11,7 @@ export default function Home() {
       <Features />
       <NewPrompts />
       <DashboardPreview />
-      <Pricing />
-      <Footer />
+      <PromptGuide />
     </div>
   )
 }
