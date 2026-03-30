@@ -34,6 +34,7 @@ export default function SignupPage() {
       if (signUpError) throw signUpError
 
       posthog.capture('signup_completed', { pm_platform: pmPlatform })
+      router.refresh()
       router.push('/app/library')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong'

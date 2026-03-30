@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { Session } from '@supabase/supabase-js'
 
 export interface AuthState {
   userId: string | null
@@ -18,10 +19,9 @@ export function useAuth(): AuthState {
   const [authChecked, setAuthChecked] = useState(false)
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
+    const supabase = createClient()
 
+    const processSession = async (session: Session | null) => {
       if (session) {
         setUserId(session.user.id)
 
@@ -35,11 +35,9 @@ export function useAuth(): AuthState {
         if (membership) {
           setTeamId(membership.team_id)
 
-          // Check if user is admin via team_members role
           if (membership.role === 'owner' || membership.role === 'admin') {
             setIsAdmin(true)
           } else {
-            // Also check if user is the team owner
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const { data: team } = await (supabase.from('teams') as any)
               .select('owner_id')
@@ -51,10 +49,27 @@ export function useAuth(): AuthState {
             }
           }
         }
+      } else {
+        setUserId(null)
+        setTeamId(null)
+        setIsAdmin(false)
       }
       setAuthChecked(true)
     }
-    checkAuth()
+
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      processSession(session)
+    })
+
+    // Listen for auth state changes (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      processSession(session)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   return { userId, teamId, isLoggedIn: !!userId, isAdmin, authChecked }
