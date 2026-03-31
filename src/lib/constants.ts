@@ -8,6 +8,28 @@ export const CATEGORIES = [
   'Meetings',
 ]
 
+export const PMO_CATEGORIES = [
+  'Status',
+  'Risks',
+  'Issues',
+  'Changes',
+  'Governance',
+  'Resource',
+  'Quality',
+  'Stakeholder',
+] as const
+
+export const CATEGORY_TO_PMO: Record<string, string> = {
+  'Planning': 'Governance',
+  'Execution': 'Status',
+  'Risk Management': 'Risks',
+  'Communication': 'Stakeholder',
+  'Reporting': 'Status',
+  'Agile': 'Changes',
+  'Meetings': 'Governance',
+  'Stakeholder': 'Stakeholder',
+}
+
 export const PM_ROLES = [
   'Product Manager',
   'Scrum Master',
