@@ -3,9 +3,9 @@
 import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Send, Sparkles, Check, Plus, Library, Users, Globe } from 'lucide-react'
+import { Send, Sparkles, Check, Plus, Library, Users, Globe, ShieldCheck, Lock } from 'lucide-react'
 import { getToolBySlug } from '@/data/tools'
-import { useAuthState } from '@/hooks/useAuthState'
+import { useAuth } from '@/hooks/useAuth'
 import { submitPrompt } from '@/lib/prompts/submitPrompt'
 import { CATEGORIES } from '@/lib/constants'
 
@@ -37,6 +37,9 @@ interface FormData {
   tags: string
   pmTools: string[]
   email: string
+  isStandard: boolean
+  isLocked: boolean
+  version: string
 }
 
 interface FormErrors {
@@ -60,12 +63,17 @@ function ContributeForm() {
     tags: '',
     pmTools: preselectedTool ? [preselectedTool.name] : [],
     email: '',
+    isStandard: false,
+    isLocked: false,
+    version: '',
   })
   const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const { userId, teamId, authChecked } = useAuthState()
+
+  const { userId, teamId, isAdmin, authChecked } = useAuth()
+  const isLoggedIn = !!userId
 
   // Update pmTools when preselectedTool changes
   useEffect(() => {
@@ -78,8 +86,6 @@ function ContributeForm() {
       })
     }
   }, [preselectedTool])
-
-  const isLoggedIn = !!userId
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
@@ -118,6 +124,10 @@ function ContributeForm() {
         email: formData.email || undefined,
         userId,
         teamId,
+        isAdmin,
+        isStandard: isAdmin ? formData.isStandard : false,
+        isLocked: isAdmin ? formData.isLocked : false,
+        version: isAdmin && formData.version ? formData.version : null,
       })
 
       setIsSuccess(true)
@@ -147,6 +157,9 @@ function ContributeForm() {
       tags: '',
       pmTools: [],
       email: '',
+      isStandard: false,
+      isLocked: false,
+      version: '',
     })
     setErrors({})
     setIsSuccess(false)
@@ -162,12 +175,18 @@ function ContributeForm() {
             <Check className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-apple-black dark:text-white mb-2">
-            {isLoggedIn ? 'Prompt Added to Your Team!' : 'Submission Received!'}
+            {isAdmin
+              ? 'Standard Prompt Published!'
+              : isLoggedIn
+                ? 'Prompt Submitted for Review!'
+                : 'Submission Received!'}
           </h1>
           <p className="text-apple-gray-500 dark:text-slate-400 mb-8">
-            {isLoggedIn
-              ? 'Your prompt has been added to your team library.'
-              : 'Thanks for contributing! Your prompt will be reviewed and, if approved, added to the Community Prompts section.'}
+            {isAdmin
+              ? 'Your standard prompt is now live in the team library.'
+              : isLoggedIn
+                ? 'Your prompt has been sent to PMO for review. It will appear in the library once approved.'
+                : 'Thanks for contributing! Your prompt will be reviewed and, if approved, added to the Community Prompts section.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
@@ -178,7 +197,7 @@ function ContributeForm() {
               Add Another
             </button>
             <Link
-              href={isLoggedIn ? '/library' : '/community'}
+              href={isLoggedIn ? '/app/library' : '/app/community'}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-apple-gray-50 dark:bg-dark-surface hover:bg-apple-gray-200 dark:hover:bg-dark-hover text-apple-black dark:text-white rounded-full transition-colors"
             >
               <Library className="w-5 h-5" />
@@ -214,17 +233,25 @@ function ContributeForm() {
           <p className="text-apple-gray-500 dark:text-slate-400">
             {preselectedTool
               ? `Optimized for ${preselectedTool.aiFeatureName}`
-              : 'Share your expertise with the community'}
+              : 'Share your expertise with the team'}
           </p>
         </div>
       </div>
 
       {/* Submission type banner */}
-      {isLoggedIn ? (
+      {isAdmin ? (
         <div className="mb-6 p-4 rounded-xl bg-apple-blue/10 border border-apple-blue/20 flex items-center gap-3">
-          <Users className="w-5 h-5 text-apple-blue-hover dark:text-apple-blue flex-shrink-0" />
-          <p className="text-sm text-apple-blue-hover dark:text-apple-blue">
-            This prompt will be added to <strong>your team&apos;s private library</strong>.
+          <ShieldCheck className="w-5 h-5 text-apple-blue flex-shrink-0" />
+          <div className="text-sm text-apple-blue-hover dark:text-apple-blue">
+            <strong>PMO Admin</strong> — prompts you create are published directly to the team library.
+            Use the options below to mark as a standard or locked prompt.
+          </div>
+        </div>
+      ) : isLoggedIn ? (
+        <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3">
+          <Users className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <p className="text-sm text-amber-700 dark:text-amber-300">
+            Your prompt will be sent to <strong>PMO for review</strong> before it appears in the team library.
           </p>
         </div>
       ) : (
@@ -412,6 +439,79 @@ function ContributeForm() {
           </div>
         </div>
 
+        {/* PMO Admin options */}
+        {isAdmin && (
+          <div className="rounded-xl border border-apple-blue/20 bg-apple-blue/5 dark:bg-apple-blue/10 p-5 space-y-4">
+            <p className="text-sm font-semibold text-apple-blue dark:text-apple-blue uppercase tracking-wide">
+              PMO Admin Options
+            </p>
+
+            {/* Version */}
+            <div>
+              <label htmlFor="version" className="block text-sm font-medium text-apple-black dark:text-white mb-1.5">
+                Version number
+              </label>
+              <input
+                type="text"
+                id="version"
+                value={formData.version}
+                onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+                placeholder="e.g., 1.0"
+                className="w-40 px-3 py-2 bg-white dark:bg-dark-card border border-apple-gray-200 dark:border-dark-border rounded-lg text-apple-black dark:text-white placeholder-apple-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm"
+              />
+              <p className="mt-1 text-xs text-apple-gray-400">
+                Shown as &quot;v1.0 – updated [month]&quot; on the prompt card
+              </p>
+            </div>
+
+            {/* Standard toggle */}
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative flex-shrink-0 mt-0.5">
+                <input
+                  type="checkbox"
+                  checked={formData.isStandard}
+                  onChange={(e) => setFormData({ ...formData, isStandard: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-10 h-6 bg-apple-gray-200 dark:bg-dark-hover rounded-full peer-checked:bg-apple-blue transition-colors" />
+                <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-apple-blue" />
+                  <span className="text-sm font-medium text-apple-black dark:text-white">Mark as standard prompt</span>
+                </div>
+                <p className="text-xs text-apple-gray-400 mt-0.5">
+                  Standard prompts are highlighted in the library as the PMO-approved baseline.
+                </p>
+              </div>
+            </label>
+
+            {/* Locked toggle */}
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative flex-shrink-0 mt-0.5">
+                <input
+                  type="checkbox"
+                  checked={formData.isLocked}
+                  onChange={(e) => setFormData({ ...formData, isLocked: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-10 h-6 bg-apple-gray-200 dark:bg-dark-hover rounded-full peer-checked:bg-apple-blue transition-colors" />
+                <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <Lock className="w-4 h-4 text-apple-gray-500" />
+                  <span className="text-sm font-medium text-apple-black dark:text-white">Lock prompt</span>
+                </div>
+                <p className="text-xs text-apple-gray-400 mt-0.5">
+                  PMs can only clone this prompt — they cannot edit the original.
+                </p>
+              </div>
+            </label>
+          </div>
+        )}
+
         {/* Submit Error */}
         {submitError && (
           <div className="p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
@@ -434,7 +534,11 @@ function ContributeForm() {
             ) : (
               <>
                 <Send className="w-5 h-5" />
-                {isLoggedIn ? 'Add to Team Library' : 'Submit for Review'}
+                {isAdmin
+                  ? 'Publish to Library'
+                  : isLoggedIn
+                    ? 'Submit for PMO Review'
+                    : 'Submit for Review'}
               </>
             )}
           </button>

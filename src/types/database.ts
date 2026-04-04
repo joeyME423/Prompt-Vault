@@ -22,6 +22,11 @@ export interface Database {
           team_id: string | null
           is_public: boolean
           use_count: number
+          is_standard: boolean
+          is_locked: boolean
+          version: string | null
+          version_updated_at: string | null
+          approval_status: string | null
         }
         Insert: {
           id?: string
@@ -35,6 +40,11 @@ export interface Database {
           team_id?: string | null
           is_public?: boolean
           use_count?: number
+          is_standard?: boolean
+          is_locked?: boolean
+          version?: string | null
+          version_updated_at?: string | null
+          approval_status?: string | null
         }
         Update: {
           id?: string
@@ -48,6 +58,11 @@ export interface Database {
           team_id?: string | null
           is_public?: boolean
           use_count?: number
+          is_standard?: boolean
+          is_locked?: boolean
+          version?: string | null
+          version_updated_at?: string | null
+          approval_status?: string | null
         }
       }
       saved_prompts: {

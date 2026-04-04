@@ -13,6 +13,11 @@ interface SubmitPromptParams {
   email?: string
   userId?: string | null
   teamId?: string | null
+  isAdmin?: boolean
+  /** PMO admin options */
+  isStandard?: boolean
+  isLocked?: boolean
+  version?: string | null
 }
 
 export async function submitPrompt(params: SubmitPromptParams): Promise<void> {
@@ -29,6 +34,12 @@ export async function submitPrompt(params: SubmitPromptParams): Promise<void> {
       author_id: params.userId!,
       team_id: params.teamId!,
       is_public: false,
+      // PMO admins publish directly; regular PMs go into review
+      approval_status: params.isAdmin ? 'approved' : 'pending_review',
+      is_standard: params.isAdmin ? (params.isStandard ?? false) : false,
+      is_locked: params.isAdmin ? (params.isLocked ?? false) : false,
+      version: params.isAdmin ? (params.version ?? null) : null,
+      version_updated_at: params.isAdmin && params.version ? new Date().toISOString() : null,
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.from('prompts') as any).insert(promptData)
