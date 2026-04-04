@@ -44,7 +44,13 @@ create table public.prompts (
   author_id uuid references public.profiles(id) on delete set null,
   team_id uuid references public.teams(id) on delete cascade,
   is_public boolean default true,
-  use_count integer default 0
+  use_count integer default 0,
+  -- Permissions & versioning (see migrations/001_add_prompt_permissions.sql)
+  is_standard boolean not null default false,
+  is_locked   boolean not null default false,
+  version     text,
+  version_updated_at timestamp with time zone,
+  approval_status text check (approval_status in ('pending_review', 'approved', 'rejected'))
 );
 
 -- Saved prompts table (many-to-many relationship)
@@ -303,3 +309,5 @@ create index prompt_ratings_user_id_idx on public.prompt_ratings(user_id);
 create index prompt_folders_user_id_idx on public.prompt_folders(user_id);
 create index saved_prompts_folder_id_idx on public.saved_prompts(folder_id);
 create index prompt_feedback_prompt_id_idx on public.prompt_feedback(prompt_id);
+create index prompts_approval_status_idx on public.prompts(approval_status);
+create index prompts_is_standard_idx on public.prompts(is_standard);
