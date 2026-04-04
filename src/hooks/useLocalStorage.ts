@@ -3,22 +3,21 @@
 import { useState, useEffect, type SetStateAction, type Dispatch } from 'react'
 
 export function useLocalStorage<T>(key: string, defaultValue: T): [T, Dispatch<SetStateAction<T>>] {
-  const [value, setValue] = useState<T>(defaultValue)
-  const [hydrated, setHydrated] = useState(false)
-
-  useEffect(() => {
-    const stored = localStorage.getItem(key)
-    if (stored) {
-      try { setValue(JSON.parse(stored)) } catch { /* ignore */ }
+  const [value, setValue] = useState<T>(() => {
+    if (typeof window === 'undefined') return defaultValue
+    try {
+      const stored = localStorage.getItem(key)
+      return stored !== null ? (JSON.parse(stored) as T) : defaultValue
+    } catch {
+      return defaultValue
     }
-    setHydrated(true)
-  }, [key])
+  })
 
   useEffect(() => {
-    if (hydrated) {
+    try {
       localStorage.setItem(key, JSON.stringify(value))
-    }
-  }, [key, value, hydrated])
+    } catch { /* ignore quota/security errors */ }
+  }, [key, value])
 
   return [value, setValue]
 }
